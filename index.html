@@ -192,6 +192,7 @@ window.EJS_inputConfig = {
 };
 
 <script>
+
 function loadGame(system, url) {
     const container = document.getElementById('game-container');
     const gameDiv = document.getElementById('game');
@@ -219,9 +220,12 @@ function loadGame(system, url) {
     // Configure EmulatorJS
     window.EJS_player = '#game';
     window.EJS_core = coreMap[system];
-    
-    // Encode URL properly for GitHub Pages
-    window.EJS_gameUrl = encodeURIComponent(url);
+
+    // Split path into folder + file
+const lastSlash = url.lastIndexOf('/');
+const folder = url.substring(0, lastSlash + 1);
+const file = url.substring(lastSlash + 1);
+window.EJS_gameUrl = folder + encodeURIComponent(file);
 
     window.EJS_pathtodata = 'https://cdn.emulatorjs.org/latest/data/';
     window.EJS_startOnLoaded = true;
