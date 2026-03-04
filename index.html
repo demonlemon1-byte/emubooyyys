@@ -178,18 +178,12 @@ p.description {
     <button onclick="loadGame('gb','g*meboy/Who Framed Roger Rabbit (USA).gb')">Who Framed Roger Rabbit</button>
 </div>
 
+<div class="menu">
+    <div class="system-label">Genesis</div>
+    <button onclick="loadGame('genesis','genesis/Sonic 3 Complete (Sonic & Knuckles modification) (130810).md')">Sonic 3 Complete (TEST)</button>
+
+
 <script>
-window.EJS_inputConfig = {
-    'P1 Up':'arrowup',
-    'P1 Down':'arrowdown',
-    'P1 Left':'arrowleft',
-    'P1 Right':'arrowright',
-    'P1 Button 1':'z',
-    'P1 Button 2':'x',
-    'P1 Button 3':'c',
-    'P1 Start':'enter',
-    'P1 Select':'shift'
-};
 
 function loadGame(system, url) {
     const container = document.getElementById('game-container');
@@ -203,7 +197,7 @@ function loadGame(system, url) {
     const coreMap = {
         nes: 'fceumm',
         snes: 'snes9x',
-        genesis: 'blastem',
+        genesis: 'picodrive',
         sega32x: 'picodrive',
         mame: 'mame2003_plus',
         gb: 'gambatte',
