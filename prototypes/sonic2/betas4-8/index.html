@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sonic 2 Betas 4-8</title>
+<style>
+body { 
+    background: #1a1a1a; 
+    color: white; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    text-align: center; 
+    margin: 0;
+    padding: 20px;
+}
+
+h1 { color: #ffcc00; text-shadow: 2px 2px #000; }
+
+#game-container { 
+    width: 100%; 
+    max-width: 800px; 
+    height: 600px; 
+    margin: 20px auto; 
+    background: #000; 
+    border: 4px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    touch-action: none; /* Important for touchscreen + mouse */
+}
+
+#game-container.fullscreen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 600px;
+    background: #000;
+    border: 4px solid #333;
+    border-radius: 8px;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+#close-game-btn {
+    display: none;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 10001;
+    padding: 8px 12px;
+    font-weight: bold;
+    background: #ffcc00;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#close-game-btn:hover { background: #ffc000; }
+
+.menu { 
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 10px;
+}
+
+button { 
+    padding: 12px; 
+    background: #444; 
+    color: white; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    transition: background 0.2s;
+    font-weight: bold;
+}
+button:hover { background: #666; border-bottom: 2px solid #ffcc00; }
+button:active { background: #222; }
+
+.system-label { 
+    grid-column: 1 / -1; 
+    text-align: left; 
+    border-bottom: 1px solid #444; 
+    margin-top: 20px;
+    color: #aaa;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+p.description {
+    color: #ccc; 
+    font-size: 1em; 
+    max-width: 800px; 
+    margin: 10px auto;
+}
+</style>
+</head>
+<body>
+
+
+<div id="game-container">
+    <div id="game">
+
+    </div>
+</div>
+
+<!-- Menu -->
+        <button onclick="loadGame('genesis', 'Sonic The Hedgehog 2 (Beta 4 - Sep 18, 1992, 16.26) (hidden-palace.org).bin')">Beta 4</button>
+        <button onclick="loadGame('genesis', 'Sonic The Hedgehog 2 (Beta 5 - Sep 21, 1992, 12.06) (hidden-palace.org).bin')">Beta 5</button>
+        <button onclick="loadGame('genesis', 'Sonic The Hedgehog 2 (Beta 6 - Sep 22, 1992, 18.47) (hidden-palace.org).bin')">Beta 6</button>
+        <button onclick="loadGame('genesis', 'Sonic The Hedgehog 2 (Beta 7 - Sep 24, 1992, 09.26) (hidden-palace.org).bin')">Beta 7</button>
+        <button onclick="loadGame('genesis', 'Sonic The Hedgehog 2 (Beta 8 - Sep 24, 1992, 19.27) (hidden-palace.org).bin')">Beta 8</button>
+<script>
+
+function loadGame(system, url) {
+    const container = document.getElementById('game-container');
+    const gameDiv = document.getElementById('game');
+    const closeBtn = document.getElementById('close-game-btn');
+
+    // Clear previous game
+    gameDiv.innerHTML = '';
+
+    // Core mapping
+    const coreMap = {
+        nes: 'fceumm',
+        snes: 'snes9x',
+        genesis: 'genesis_plus_gx',
+        sega32x: 'picodrive',
+        mame: 'mame2003_plus',
+        gb: 'gambatte',
+        stella2014: 'stella2014'
+    };
+
+    // Reset globals
+    delete window.EJS_loaded;
+    delete window.EJS_emulator;
+    delete window.Module;
+
+    // Configure EmulatorJS
+    window.EJS_player = '#game';
+    window.EJS_core = coreMap[system];
+    window.EJS_gameUrl = url;
+    window.EJS_pathtodata = 'https://deepakrummy.github.io/storage/emulatorjs/data/';
+    window.EJS_startOnLoaded = true;
+    window.EJS_forceLegacyCores = false;
+
+    // Load EmulatorJS
+    const script = document.createElement('script');
+    script.src = 'https://deepakrummy.github.io/storage/emulatorjs/data/loader.js';
+    script.onload = () => {
+        const checkLoaded = setInterval(() => {
+            if (window.EJS_loaded) {
+                clearInterval(checkLoaded);
+                container.classList.add('fullscreen');
+                closeBtn.style.display = 'block';
+                window.scrollTo({ top:0, behavior:'auto' });
+                closeBtn.onclick = () => location.reload();
+            }
+        }, 100);
+    };
+    document.body.appendChild(script);
+}
+</script>
+
+</body>
+</html>
