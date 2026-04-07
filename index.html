@@ -213,50 +213,44 @@ function loadGame(system, url) {
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
+    window.EJS_forceLegacyCores = false;
+
+    // Use your repo for the data path
+    const myData = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
 
     if (system === 'sega32x') {
         window.EJS_core = 'picodrive';
-        window.EJS_gameID = 'genesis'; 
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
-    } else {
+        
+        // POINT TO YOUR NEW CUSTOM JSON
+        window.EJS_gameID = 'sega32x'; 
+        window.EJS_system = myData + 'system/sega32x.json?v=' + Date.now();
+    } 
+    else {
         let coreName = system;
         if (system === 'mame') coreName = 'mame2003_plus';
         if (system === 'genesis') coreName = 'genesis_plus_gx';
+        
         window.EJS_core = coreName;
-        window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
+        window.EJS_pathtodata = myData;
+        window.EJS_system = 'controls/32x/' + system + '.json';
     }
 
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-    
+    document.body.appendChild(script);
+
     script.onload = () => {
         const checkLoaded = setInterval(() => {
             if (window.EJS_loaded) {
                 clearInterval(checkLoaded);
                 container.classList.add('fullscreen');
                 closeBtn.style.display = 'block';
-                
-                // --- THE CHROMEBOOK "SIDE DOOR" FIX ---
-                // We wait for the emulator to actually start the core
-                setTimeout(() => {
-                    try {
-                        // Manually injecting the Genesis layout into the active emulator instance
-                        if (window.EJS_emulator && system === 'sega32x') {
-                            const genButtons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
-                            window.EJS_emulator.buttons = genButtons;
-                            console.log("Controls Forced.");
-                        }
-                    } catch(e) { console.log("Force failed, core locked."); }
-                }, 2000);
-
                 window.scrollTo({ top: 0, behavior: 'auto' });
                 closeBtn.onclick = () => location.reload();
             }
         }, 100);
     };
-    document.body.appendChild(script);
 }
 </script>
     
