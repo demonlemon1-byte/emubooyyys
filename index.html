@@ -207,39 +207,38 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
+    // 1. COMPLETELY WIPE THE OLD PLAYER
     gameDiv.innerHTML = '';
+    if (window.EJS_emulator) {
+        window.EJS_emulator.stop(); // Try to stop existing instance
+    }
+    
+    // 2. Clear old scripts to prevent "double-loading"
+    const oldScripts = document.querySelectorAll('script[src*="loader.js"]');
+    oldScripts.forEach(s => s.remove());
 
+    // 3. Set the new variables
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
-    window.EJS_forceLegacyCores = false;
     
-    // Set your base data path once to keep things clean
-    const myDataPath = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-
+    // Check for 32X vs others
     if (system === 'sega32x') {
         window.EJS_core = 'picodrive';
-        window.EJS_pathtodata = myDataPath;
-        window.EJS_gameID = 'genesis'; // This fixes the "BUTTON_1" label issue
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+        window.EJS_gameID = 'genesis'; 
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
-        
-        // Ensure these BIOS files actually exist in your repo at these paths!
-        window.EJS_bios = {
-            "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
-            "32X_M_BIOS.bin": "32x/bios/32X - Master BIOS.bin",
-            "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
-        };
-    } 
-    else {
+    } else {
         let coreName = system;
         if (system === 'mame') coreName = 'mame2003_plus';
         if (system === 'genesis') coreName = 'genesis_plus_gx';
         
         window.EJS_core = coreName;
-        window.EJS_pathtodata = myDataPath;
+        window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
     }
 
+    // 4. Inject the loader fresh
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
     
