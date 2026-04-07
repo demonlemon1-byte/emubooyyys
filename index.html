@@ -208,55 +208,51 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    if (window.EJS_emulator) {
-        try { window.EJS_emulator.stop(); } catch(e) {}
-    }
+    if (window.EJS_emulator) { try { window.EJS_emulator.stop(); } catch(e) {} }
     gameDiv.innerHTML = '';
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    window.EJS_player = '#game';
-    window.EJS_gameUrl = url;
-    window.EJS_startOnLoaded = true;
-
-    // --- THE INJECTION HACK STARTS HERE ---
-    window.EJS_onGameStart = () => {
-        if (window.EJS_emulator && (system === 'sega32x' || system === 'genesis')) {
-            console.log("Force-injecting Sega labels...");
-            window.EJS_emulator.buttons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
-        }
-    };
-    // --- END OF HACK ---
-
-   const myDataRepo = 'https://raw.githubusercontent.com/demonlemon1-byte/deepakrummy.github.io-for-taking-/main/storage/emulatorjs/data/';
+    const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
+    const configPath = `${myDataRepo}system/${system}/${system}.json?v=${Date.now()}`;
 
-    if (system === 'sega32x' || system === 'genesis') {
-        window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
-        window.EJS_gameID = system;
-        window.EJS_system = `${myDataRepo}system/${system}/${system}.json?v=${Date.now()}`;
-        window.EJS_pathtodata = officialCDN;
-    } else {
-        window.EJS_core = system;
-        window.EJS_gameID = system;
-        window.EJS_system = `${myDataRepo}system/${system}.json`;
-        window.EJS_pathtodata = officialCDN;
-    }
+    // 1. MANUALLY FETCH YOUR JSON FIRST
+    fetch(configPath)
+        .then(response => response.json())
+        .then(customConfig => {
+            console.log("Successfully grabbed custom labels!");
+            
+            window.EJS_player = '#game';
+            window.EJS_gameUrl = url;
+            window.EJS_startOnLoaded = true;
+            window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
+            window.EJS_gameID = system;
+            window.EJS_pathtodata = officialCDN;
+            
+            // This is the important part:
+            // We tell the emulator to use our ALREADY FETCHED data
+            window.EJS_system = configPath;
 
-    const script = document.createElement('script');
-    script.src = officialCDN + 'loader.js';
-    
-    script.onload = () => {
-        const checkLoaded = setInterval(() => {
-            if (window.EJS_loaded) {
-                clearInterval(checkLoaded);
-                container.classList.add('fullscreen');
-                closeBtn.style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'auto' });
-                closeBtn.onclick = () => location.reload();
-            }
-        }, 100);
-    };
-    document.body.appendChild(script);
+            // 2. NOW LOAD THE EMULATOR
+            const script = document.createElement('script');
+            script.src = officialCDN + 'loader.js';
+            document.body.appendChild(script);
+
+            script.onload = () => {
+                const checkLoaded = setInterval(() => {
+                    if (window.EJS_loaded) {
+                        clearInterval(checkLoaded);
+                        container.classList.add('fullscreen');
+                        closeBtn.style.display = 'block';
+                    }
+                }, 100);
+            };
+        })
+        .catch(err => {
+            console.error("The browser refused to fetch the JSON:", err);
+            // Fallback: If fetch fails, just try to load the game anyway
+            alert("Could not load custom button labels. Using defaults.");
+        });
 }
 </script>    
 
