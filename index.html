@@ -217,42 +217,42 @@ function loadGame(system, url) {
 
     const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
-    const configPath = `${myDataRepo}system/${system}/${system}.json?v=${Date.now()}`;
 
-    // 2. The Fetch & Inject Logic
+    // Determine the core name based on the system
+    const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
+    
+    // Updated path to use the CORE name for the folder and file
+    const configPath = `${myDataRepo}system/${coreName}/${coreName}.json?v=${Date.now()}`;
+
     fetch(configPath)
         .then(response => response.json())
         .then(customConfig => {
-            console.log("JSON Data Loaded.");
+            console.log("JSON Data Loaded for core: " + coreName);
 
             window.EJS_player = '#game';
             window.EJS_gameUrl = url;
             window.EJS_startOnLoaded = true;
-            window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
-            window.EJS_gameID = system;
+            window.EJS_core = coreName;
+            window.EJS_gameID = coreName; // Use core name as ID to be safe
             window.EJS_pathtodata = officialCDN;
             window.EJS_system = configPath;
 
-            // --- THE RAM INJECTION ---
-            // This runs the moment the game boots, forcing the labels into the UI
-window.EJS_onGameStart = () => {
-    console.log("Game started. Initiating persistent label enforcement...");
-    
-    // Attempt to force labels multiple times to beat the core's own initialization
-    let attempts = 0;
-    const forceLabels = setInterval(() => {
-        if (window.EJS_emulator) {
-            // Overwrite the label array
-            window.EJS_emulator.buttons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
-            
-            // Log for your console so we can see it's working
-            console.log("Labels forced (Attempt " + (attempts + 1) + ")");
-        }
-        
-        attempts++;
-        if (attempts > 10) clearInterval(forceLabels); // Stop after 10 attempts
-    }, 500); // Runs every half-second for 5 seconds
-};
+            // --- THE PERSISTENT INJECTION ---
+            window.EJS_onGameStart = () => {
+                console.log("Game started. Enforcing " + coreName + " labels...");
+                let attempts = 0;
+                const forceLabels = setInterval(() => {
+                    if (window.EJS_emulator) {
+                        // The specific Sega layout
+                        const segaButtons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+                        
+                        window.EJS_emulator.buttons = segaButtons;
+                        console.log("Labels forced (Attempt " + (attempts + 1) + ")");
+                    }
+                    attempts++;
+                    if (attempts > 10) clearInterval(forceLabels);
+                }, 500);
+            };
             
             const script = document.createElement('script');
             script.src = officialCDN + 'loader.js';
@@ -268,9 +268,12 @@ window.EJS_onGameStart = () => {
                 }, 100);
             };
         })
-        .catch(err => console.error("Fetch failed:", err));
+        .catch(err => {
+            console.error("Fetch failed for " + configPath, err);
+            // If the fetch fails, you might need to rename your files on GitHub to match the coreName
+        });
 }
-</script>    
+</script>
 
 </body>
 </html>
