@@ -227,7 +227,7 @@ function loadGame(system, url) {
     // 2. Setup System Paths (The "Test Pilot" Logic)
     if (system === 'sega32x' || system === 'genesis') {
         // These use your new folder-per-system structure
-        window.EJS_gameID = system; 
+        window.EJS_gameID = mame; 
         window.EJS_system = myData + 'system/' + system + '/' + system + '.json?v=' + Date.now();
     } 
     else {
