@@ -211,44 +211,30 @@ function loadGame(system, url) {
 
     gameDiv.innerHTML = '';
 
-    const coreMap = {
-        nes: 'fceumm',
-        snes: 'snes9x',
-        genesis: 'genesis_plus_gx',
-        sega32x: 'picodrive',
-        mame: 'mame2003_plus',
-        gb: 'gambatte',
-        gba: 'mgba'
-    };
-
     window.EJS_player = '#game';
-    window.EJS_core = coreMap[system] || system;
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
-    // --- THE SWITCH ---
     if (system === 'sega32x') {
-        // Use CDN for 32X to fix the black screen/core issues
+        window.EJS_core = 'picodrive';
+        // Use CDN for the engine to fix the black screen
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-    } else {
-        // Use your GitHub for everything else
-        window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-    }
-
-    // Always use CDN for system layouts (Fixes the "Button 1" bug)
-    window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
-
-    // Define BIOS (The CDN has these internally, but we'll define them just in case)
-    if (system === 'sega32x') {
+        // FORCE the 32X to use the Genesis control layout specifically
+        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
+        
+        // BIOS mapping for 32X specifically
         window.EJS_bios = {
             "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
             "32X_M_BIOS.bin": "32x/bios/32X - Master BIOS.bin",
             "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
         };
+    } else {
+        window.EJS_core = system; // Mapping for nes, snes, etc.
+        window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
+        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
     }
 
-    // Load the Engine
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
     
