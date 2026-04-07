@@ -207,40 +207,39 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // 1. COMPLETELY WIPE THE OLD PLAYER
     gameDiv.innerHTML = '';
-    if (window.EJS_emulator) {
-        window.EJS_emulator.stop(); // Try to stop existing instance
-    }
     
-    // 2. Clear old scripts to prevent "double-loading"
-    const oldScripts = document.querySelectorAll('script[src*="loader.js"]');
-    oldScripts.forEach(s => s.remove());
+    // Wipe old script tags to prevent conflicts
+    document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    // 3. Set the new variables
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
-    
-    // Check for 32X vs others
+    window.EJS_forceLegacyCores = false;
+
+    // A "cache buster" ensures the browser gets a fresh config every time
+    const cb = '?v=' + Math.random();
+
     if (system === 'sega32x') {
         window.EJS_core = 'picodrive';
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+        
+        // FORCE Genesis mapping for 32X
         window.EJS_gameID = 'genesis'; 
-        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
-    } else {
+        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json' + cb;
+    } 
+    else {
         let coreName = system;
         if (system === 'mame') coreName = 'mame2003_plus';
         if (system === 'genesis') coreName = 'genesis_plus_gx';
         
         window.EJS_core = coreName;
         window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
+        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json' + cb;
     }
 
-    // 4. Inject the loader fresh
     const script = document.createElement('script');
-    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js' + cb;
     
     script.onload = () => {
         const checkLoaded = setInterval(() => {
