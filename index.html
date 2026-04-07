@@ -196,6 +196,12 @@ p.description {
         <button onclick="loadGame('genesis', 'genesis/Sonic Delta 40mb.bin')">Sonic Delta 40mb</button>
 </div>
 
+<div class="menu">
+    <div class="system-label">32x (TESTING)</div>
+        <button onclick="loadhttp:'/32x/Knuckles_%20Chaotix%20(1995)(Sega)(JP-US)(en).bin')">Sonic Crackers but slightly more completed</button>
+</div>
+
+    
 <script>
 
 function loadGame(system, url) {
@@ -228,9 +234,9 @@ function loadGame(system, url) {
     window.EJS_gameUrl = url;
     // BIOS files
 window.EJS_bios = {
-    "32X - Genesis BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
-    "32X - Master BIOS.bin": "32x/bios/32X - Master BIOS.bin",
-    "32X - Slave BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
+    "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
+    "32X_M_BIOS.bin": "32x/bios/32X - Master BIOS.bin",
+    "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
 };
     window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     window.EJS_startOnLoaded = true;
