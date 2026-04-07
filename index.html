@@ -211,17 +211,19 @@ function loadGame(system, url) {
 
     gameDiv.innerHTML = '';
 
-    // --- Configuration ---
+    // 1. Point to your GitHub so it finds your 32X BIOS and ROMs
+    window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
+    
+    // 2. Point to the CDN for the button labels (Fixes the "Button 1" bug)
+    window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
+
     window.EJS_player = '#game';
     window.EJS_core = (system === 'sega32x') ? 'picodrive' : system; 
     window.EJS_gameUrl = url;
-    window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     window.EJS_startOnLoaded = true;
-    window.EJS_forceLegacyCores = true;
-
-    // THIS IS THE PART YOU GLUED IN:
-    // It uses the "system" variable to grab the right layout from the CDN
-    window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
+    
+    // 3. Set this to false to avoid the "genesis-legacy-wasm" error
+    window.EJS_forceLegacyCores = false;
 
     window.EJS_bios = {
         "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
@@ -229,14 +231,10 @@ function loadGame(system, url) {
         "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
     };
 
- 
-    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-    window.EJS_startOnLoaded = true;
-    window.EJS_forceLegacyCores = false;
-
-    // Load EmulatorJS
+    // 4. Use the CDN Loader (It's more stable than the one in your storage folder)
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+    
     script.onload = () => {
         const checkLoaded = setInterval(() => {
             if (window.EJS_loaded) {
