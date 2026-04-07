@@ -207,41 +207,45 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
+    // 1. COMPLETELY WIPE THE OLD INSTANCE
+    // This prevents the 'GLctx' undefined error caused by overlapping instances
+    if (window.EJS_emulator) {
+        window.EJS_emulator.stop();
+    }
     gameDiv.innerHTML = '';
-    // Clean up old scripts
+    
+    // Remove all old loader scripts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
+    // 2. CONFIGURE NEW SETTINGS
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
-    window.EJS_forceLegacyCores = false;
-
-    // Use your data repo
-const myData = 'https://raw.githubusercontent.com/demonlemon1-byte/deepakrummy.github.io-for-taking-/main/storage/emulatorjs/data/';
     
+    // The base path to your data repo
+    const myData = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
+
+    // Logic for 32X and Genesis specifically
     if (system === 'sega32x' || system === 'genesis') {
         window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
+        window.EJS_gameID = system;
         
-        // Try forcing 'genesis' as the ID for both to get the ABC labels
-        window.EJS_gameID = 'genesis'; 
+        // Use the folder structure you created
+        window.EJS_system = `${myData}system/${system}/${system}.json?v=${Date.now()}`;
         
-        // POINT DIRECTLY TO THE FILE - No extra variables
-        // Make sure this file exists at: storage/emulatorjs/data/system/genesis/genesis.json
-        window.EJS_system = myData + 'system/genesis/genesis.json';
-        
-        // 32X BIOS fix
+        // 32X needs the CDN wasm files to avoid the GLctx error on PC
         window.EJS_pathtodata = (system === 'sega32x') ? 'https://cdn.emulatorjs.org/stable/data/' : myData;
     } else {
         window.EJS_core = system;
         window.EJS_gameID = system;
-        window.EJS_system = myData + 'system/' + system + '.json';
+        window.EJS_system = `${myData}system/${system}.json`;
         window.EJS_pathtodata = myData;
     }
 
+    // 3. LAUNCH FRESH
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-    document.body.appendChild(script);
-
+    
     script.onload = () => {
         const checkLoaded = setInterval(() => {
             if (window.EJS_loaded) {
@@ -253,8 +257,8 @@ const myData = 'https://raw.githubusercontent.com/demonlemon1-byte/deepakrummy.g
             }
         }, 100);
     };
+    document.body.appendChild(script);
 }
-</script>
-    
+</script>    
 </body>
 </html>
