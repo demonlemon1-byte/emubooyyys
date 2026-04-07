@@ -214,7 +214,7 @@ function loadGame(system, url) {
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
-if (system === 'sega32x') {
+    if (system === 'sega32x') {
         window.EJS_core = 'picodrive';
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
         window.EJS_gameID = 'genesis'; 
@@ -226,24 +226,17 @@ if (system === 'sega32x') {
         };
     } 
     else {
-        // --- NEW MAPPING LOGIC START ---
+        // This handles MAME, Genesis, NES, SNES, etc.
         let coreName = system;
         if (system === 'mame') coreName = 'mame2003_plus';
         if (system === 'genesis') coreName = 'genesis_plus_gx';
         
         window.EJS_core = coreName;
-        // --- NEW MAPPING LOGIC END ---
-
-        window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
-    }
-} // <--- Added missing closing brace for IF
-    else {
-        window.EJS_core = system; // Mapping for nes, snes, etc.
         window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
     }
 
+    // Load the loader.js script after the variables are set
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
     
@@ -259,7 +252,7 @@ if (system === 'sega32x') {
         }, 100);
     };
     document.body.appendChild(script);
-} // <--- Added missing closing brace for the function
+}
 </script>
     
 </body>
