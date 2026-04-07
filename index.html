@@ -208,6 +208,7 @@ function loadGame(system, url) {
     const closeBtn = document.getElementById('close-game-btn');
 
     gameDiv.innerHTML = '';
+    // Clean up old scripts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
     window.EJS_player = '#game';
@@ -215,29 +216,27 @@ function loadGame(system, url) {
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
+    // Use your data repo
     const myData = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
 
-    // 1. Setup Cores
-    let coreName = system;
-    if (system === 'mame') coreName = 'mame2003_plus';
-    if (system === 'genesis') coreName = 'genesis_plus_gx';
-    if (system === 'sega32x') coreName = 'picodrive';
-    window.EJS_core = coreName;
-
-    // 2. Setup System Paths (The "Test Pilot" Logic)
     if (system === 'sega32x' || system === 'genesis') {
-        // These use your new folder-per-system structure
-        window.EJS_gameID = mame; 
-        window.EJS_system = myData + 'system/' + system + '/' + system + '.json?v=' + Date.now();
-    } 
-    else {
-        // Everything else uses the old flat 'system/name.json' path
+        window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
+        
+        // Try forcing 'genesis' as the ID for both to get the ABC labels
+        window.EJS_gameID = 'genesis'; 
+        
+        // POINT DIRECTLY TO THE FILE - No extra variables
+        // Make sure this file exists at: storage/emulatorjs/data/system/genesis/genesis.json
+        window.EJS_system = myData + 'system/genesis/genesis.json';
+        
+        // 32X BIOS fix
+        window.EJS_pathtodata = (system === 'sega32x') ? 'https://cdn.emulatorjs.org/stable/data/' : myData;
+    } else {
+        window.EJS_core = system;
         window.EJS_gameID = system;
         window.EJS_system = myData + 'system/' + system + '.json';
+        window.EJS_pathtodata = myData;
     }
-
-    // 3. Handle Data Path (32X needs CDN for BIOS)
-    window.EJS_pathtodata = (system === 'sega32x') ? 'https://cdn.emulatorjs.org/stable/data/' : myData;
 
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
