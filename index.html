@@ -202,49 +202,46 @@ p.description {
 </div>
 
 <script>
+
 function loadGame(system, url) {
     const container = document.getElementById('game-container');
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // 1. COMPLETELY WIPE THE OLD INSTANCE
-    // This prevents the 'GLctx' undefined error caused by overlapping instances
+    // Kill any existing emulator instance to prevent GLctx crashes
     if (window.EJS_emulator) {
-        window.EJS_emulator.stop();
+        try { window.EJS_emulator.stop(); } catch(e) {}
     }
     gameDiv.innerHTML = '';
-    
-    // Remove all old loader scripts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    // 2. CONFIGURE NEW SETTINGS
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
-    
-    // The base path to your data repo
-    const myData = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
 
-    // Logic for 32X and Genesis specifically
+    // Your external repo for custom button labels
+    const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
+    // The official CDN for the heavy WASM/Core files (prevents CORS/Aborted errors)
+    const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
+
     if (system === 'sega32x' || system === 'genesis') {
         window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
         window.EJS_gameID = system;
         
-        // Use the folder structure you created
-        window.EJS_system = `${myData}system/${system}/${system}.json?v=${Date.now()}`;
+        // Use YOUR custom JSON for the A, B, C labels
+        window.EJS_system = `${myDataRepo}system/${system}/${system}.json?v=${Date.now()}`;
         
-        // 32X needs the CDN wasm files to avoid the GLctx error on PC
-        window.EJS_pathtodata = (system === 'sega32x') ? 'https://cdn.emulatorjs.org/stable/data/' : myData;
+        // Use the OFFICIAL CDN for the core files to stop the "Aborted" error
+        window.EJS_pathtodata = officialCDN;
     } else {
         window.EJS_core = system;
         window.EJS_gameID = system;
-        window.EJS_system = `${myData}system/${system}.json`;
-        window.EJS_pathtodata = myData;
+        window.EJS_system = `${myDataRepo}system/${system}.json`;
+        window.EJS_pathtodata = officialCDN;
     }
 
-    // 3. LAUNCH FRESH
     const script = document.createElement('script');
-    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+    script.src = officialCDN + 'loader.js';
     
     script.onload = () => {
         const checkLoaded = setInterval(() => {
@@ -260,5 +257,6 @@ function loadGame(system, url) {
     document.body.appendChild(script);
 }
 </script>    
+
 </body>
 </html>
