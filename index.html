@@ -215,24 +215,28 @@ function loadGame(system, url) {
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
-    // This is the base URL for your EXTERNAL repo (where the data lives)
     const myData = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
 
-    // 1. Dynamic Pathing logic
-    // This creates: https://demonlemon1-byte.github.io/.../data/system/sega32x/sega32x.json
-    const systemConfigPath = myData + 'system/' + system + '/' + system + '.json?v=' + Date.now();
-
-    // 2. Set Core Names
+    // 1. Setup Cores
     let coreName = system;
     if (system === 'mame') coreName = 'mame2003_plus';
     if (system === 'genesis') coreName = 'genesis_plus_gx';
     if (system === 'sega32x') coreName = 'picodrive';
-
     window.EJS_core = coreName;
-    window.EJS_gameID = system; 
-    window.EJS_system = systemConfigPath;
 
-    // 32X still needs CDN for BIOS, others use your repo
+    // 2. Setup System Paths (The "Test Pilot" Logic)
+    if (system === 'sega32x' || system === 'genesis') {
+        // These use your new folder-per-system structure
+        window.EJS_gameID = system; 
+        window.EJS_system = myData + 'system/' + system + '/' + system + '.json?v=' + Date.now();
+    } 
+    else {
+        // Everything else uses the old flat 'system/name.json' path
+        window.EJS_gameID = system;
+        window.EJS_system = myData + 'system/' + system + '.json';
+    }
+
+    // 3. Handle Data Path (32X needs CDN for BIOS)
     window.EJS_pathtodata = (system === 'sega32x') ? 'https://cdn.emulatorjs.org/stable/data/' : myData;
 
     const script = document.createElement('script');
