@@ -209,7 +209,6 @@ function loadGame(system, url) {
 
     gameDiv.innerHTML = '';
     
-    // Wipe old script tags to prevent conflicts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
     window.EJS_player = '#game';
@@ -217,16 +216,23 @@ function loadGame(system, url) {
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
-    // A "cache buster" ensures the browser gets a fresh config every time
-    const cb = '?v=' + Math.random();
-
     if (system === 'sega32x') {
         window.EJS_core = 'picodrive';
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
         
-        // FORCE Genesis mapping for 32X
+        // --- THE MANUAL OVERRIDE START ---
+        // This force-injects the labels directly into the settings memory
+        window.EJS_settings = {
+            "controls": {
+                "0": {
+                    "buttons": ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"]
+                }
+            }
+        };
+        // --- THE MANUAL OVERRIDE END ---
+
         window.EJS_gameID = 'genesis'; 
-        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json' + cb;
+        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
     } 
     else {
         let coreName = system;
@@ -235,11 +241,11 @@ function loadGame(system, url) {
         
         window.EJS_core = coreName;
         window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json' + cb;
+        window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
     }
 
     const script = document.createElement('script');
-    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js' + cb;
+    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
     
     script.onload = () => {
         const checkLoaded = setInterval(() => {
