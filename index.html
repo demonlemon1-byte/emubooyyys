@@ -235,13 +235,25 @@ function loadGame(system, url) {
 
             // --- THE RAM INJECTION ---
             // This runs the moment the game boots, forcing the labels into the UI
-            window.EJS_onGameStart = () => {
-                if (window.EJS_emulator) {
-                    console.log("Overwriting labels in RAM...");
-                    window.EJS_emulator.buttons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
-                }
-            };
-
+window.EJS_onGameStart = () => {
+    console.log("Game started. Initiating persistent label enforcement...");
+    
+    // Attempt to force labels multiple times to beat the core's own initialization
+    let attempts = 0;
+    const forceLabels = setInterval(() => {
+        if (window.EJS_emulator) {
+            // Overwrite the label array
+            window.EJS_emulator.buttons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+            
+            // Log for your console so we can see it's working
+            console.log("Labels forced (Attempt " + (attempts + 1) + ")");
+        }
+        
+        attempts++;
+        if (attempts > 10) clearInterval(forceLabels); // Stop after 10 attempts
+    }, 500); // Runs every half-second for 5 seconds
+};
+            
             const script = document.createElement('script');
             script.src = officialCDN + 'loader.js';
             document.body.appendChild(script);
