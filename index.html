@@ -238,13 +238,13 @@ window.EJS_bios = {
     "32X_M_BIOS.bin": "32x/bios/32X - Master BIOS.bin",
     "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
 };
-    window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
+    window.EJS_pathtodata = 'https://https://cdn.emulatorjs.org/stable/data/';
     window.EJS_startOnLoaded = true;
-    window.EJS_forceLegacyCores = false;
+    window.EJS_forceLegacyCores = true;
 
     // Load EmulatorJS
     const script = document.createElement('script');
-    script.src = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/loader.js';
+    script.src = 'https://https://cdn.emulatorjs.org/stable/data/loader.js';
     script.onload = () => {
         const checkLoaded = setInterval(() => {
             if (window.EJS_loaded) {
