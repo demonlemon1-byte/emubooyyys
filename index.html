@@ -209,35 +209,27 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // Clear previous game
     gameDiv.innerHTML = '';
 
-    // Core mapping
-    const coreMap = {
-        nes: 'fceumm',
-        snes: 'snes9x',
-        genesis: 'genesis_plus_gx',
-        sega32x: 'picodrive',
-        mame: 'mame2003_plus',
-        gb: 'gambatte',
-        stella2014: 'stella2014'
+    // --- Configuration ---
+    window.EJS_player = '#game';
+    window.EJS_core = (system === 'sega32x') ? 'picodrive' : system; 
+    window.EJS_gameUrl = url;
+    window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
+    window.EJS_startOnLoaded = true;
+    window.EJS_forceLegacyCores = true;
+
+    // THIS IS THE PART YOU GLUED IN:
+    // It uses the "system" variable to grab the right layout from the CDN
+    window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
+
+    window.EJS_bios = {
+        "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
+        "32X_M_BIOS.bin": "32x/bios/32X - Master BIOS.bin",
+        "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
     };
 
-    // Reset globals
-    delete window.EJS_loaded;
-    delete window.EJS_emulator;
-    delete window.Module;
-
-    // Configure EmulatorJS
-    window.EJS_player = '#game';
-    window.EJS_core = coreMap[system];
-    window.EJS_gameUrl = url;
-    // BIOS files
-window.EJS_bios = {
-    "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
-    "32X_M_BIOS.bin": "32x/bios/32X - Master BIOS.bin",
-    "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
-};
+ 
     window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
