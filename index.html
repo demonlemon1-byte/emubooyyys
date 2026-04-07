@@ -208,51 +208,55 @@ function loadGame(system, url) {
     const closeBtn = document.getElementById('close-game-btn');
 
     gameDiv.innerHTML = '';
-    
-    // Nuke any existing emulator traces
-    if (window.EJS_emulator) window.EJS_emulator.stop();
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    // Set the variables
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
-    window.EJS_forceLegacyCores = false;
 
     if (system === 'sega32x') {
         window.EJS_core = 'picodrive';
-        window.EJS_gameID = 'genesis'; // This MUST be 'genesis' for ABC buttons
+        window.EJS_gameID = 'genesis'; 
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
     } else {
         let coreName = system;
         if (system === 'mame') coreName = 'mame2003_plus';
         if (system === 'genesis') coreName = 'genesis_plus_gx';
-        
         window.EJS_core = coreName;
         window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
     }
 
-    // THE CHROMEBOOK WORKAROUND: 
-    // Wait 50ms before injecting the script to ensure the window variables are locked in.
-    setTimeout(() => {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js?cachebust=' + Date.now();
-        
-        script.onload = () => {
-            const checkLoaded = setInterval(() => {
-                if (window.EJS_loaded) {
-                    clearInterval(checkLoaded);
-                    container.classList.add('fullscreen');
-                    closeBtn.style.display = 'block';
-                    window.scrollTo({ top: 0, behavior: 'auto' });
-                    closeBtn.onclick = () => location.reload();
-                }
-            }, 100);
-        };
-        document.body.appendChild(script);
-    }, 50);
+    const script = document.createElement('script');
+    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+    
+    script.onload = () => {
+        const checkLoaded = setInterval(() => {
+            if (window.EJS_loaded) {
+                clearInterval(checkLoaded);
+                container.classList.add('fullscreen');
+                closeBtn.style.display = 'block';
+                
+                // --- THE CHROMEBOOK "SIDE DOOR" FIX ---
+                // We wait for the emulator to actually start the core
+                setTimeout(() => {
+                    try {
+                        // Manually injecting the Genesis layout into the active emulator instance
+                        if (window.EJS_emulator && system === 'sega32x') {
+                            const genButtons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+                            window.EJS_emulator.buttons = genButtons;
+                            console.log("Controls Forced.");
+                        }
+                    } catch(e) { console.log("Force failed, core locked."); }
+                }, 2000);
+
+                window.scrollTo({ top: 0, behavior: 'auto' });
+                closeBtn.onclick = () => location.reload();
+            }
+        }, 100);
+    };
+    document.body.appendChild(script);
 }
 </script>
     
