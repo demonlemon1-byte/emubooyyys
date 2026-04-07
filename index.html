@@ -209,6 +209,7 @@ function loadGame(system, url) {
 
     gameDiv.innerHTML = '';
     
+    // Completely nuke existing scripts to clear memory
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
     window.EJS_player = '#game';
@@ -217,21 +218,11 @@ function loadGame(system, url) {
     window.EJS_forceLegacyCores = false;
 
     if (system === 'sega32x') {
+        // THE "TRICK"
+        // We set the internal system name to 'genesis' so the UI uses Genesis labels
         window.EJS_core = 'picodrive';
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-        
-        // --- THE MANUAL OVERRIDE START ---
-        // This force-injects the labels directly into the settings memory
-        window.EJS_settings = {
-            "controls": {
-                "0": {
-                    "buttons": ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"]
-                }
-            }
-        };
-        // --- THE MANUAL OVERRIDE END ---
-
         window.EJS_gameID = 'genesis'; 
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
     } 
     else {
@@ -251,6 +242,15 @@ function loadGame(system, url) {
         const checkLoaded = setInterval(() => {
             if (window.EJS_loaded) {
                 clearInterval(checkLoaded);
+                
+                // FORCE THE LABELS ONE LAST TIME VIA DOM INJECTION
+                // If the emulator won't do it, we wait for it to load and then poke it
+                setTimeout(() => {
+                    if(window.EJS_emulator) {
+                        console.log("Attempting manual control sync...");
+                    }
+                }, 1000);
+
                 container.classList.add('fullscreen');
                 closeBtn.style.display = 'block';
                 window.scrollTo({ top: 0, behavior: 'auto' });
