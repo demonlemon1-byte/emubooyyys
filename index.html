@@ -208,7 +208,6 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // 1. Kill any zombie instances
     if (window.EJS_emulator) {
         try { window.EJS_emulator.stop(); } catch(e) {}
     }
@@ -217,67 +216,41 @@ function loadGame(system, url) {
 
     const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
-
-    // Determine the core name
     const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
-    
-    // Updated path to use the CORE name
     const configPath = `${myDataRepo}system/${coreName}/${coreName}.json?v=${Date.now()}`;
 
-    fetch(configPath)
-        .then(response => response.json())
-        .then(customConfig => {
-            console.log("JSON Data Loaded. Attempting Pre-emptive strike...");
+    // We skip the fetch and define EVERYTHING globally first
+    const segaLabels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
 
-            const segaLabels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+    window.EJS_player = '#game';
+    window.EJS_gameUrl = url;
+    window.EJS_core = coreName;
+    window.EJS_gameID = coreName; 
+    window.EJS_pathtodata = officialCDN;
+    window.EJS_startOnLoaded = true;
+    
+    // This is the "God Mode" config object for EmulatorJS
+    window.EJS_config = {
+        systemName: coreName,
+        buttons: segaLabels,
+        externalConfig: configPath
+    };
 
-            // Set the standard variables
-            window.EJS_player = '#game';
-            window.EJS_gameUrl = url;
-            window.EJS_core = coreName;
-            window.EJS_gameID = coreName; 
-            window.EJS_pathtodata = officialCDN;
-            window.EJS_system = configPath;
-            window.EJS_startOnLoaded = true;
-
-            // PRE-EMPTIVE OVERRIDES
-            window.EJS_settings = {
-                buttons: segaLabels,
-                key_bins: segaLabels
-            };
-            window.EJS_buttons = segaLabels;
-
-            // BACKUP RAM INJECTION
-            window.EJS_onGameStart = () => {
-                console.log("Game started. Applying RAM override...");
-                if (window.EJS_emulator) {
-                    window.EJS_emulator.buttons = segaLabels;
-                }
-            };
-
-            // Only create and append the script ONCE inside the successful fetch
-            const script = document.createElement('script');
-            script.src = officialCDN + 'loader.js';
-            
-            script.onload = () => {
-                const checkLoaded = setInterval(() => {
-                    if (window.EJS_loaded) {
-                        clearInterval(checkLoaded);
-                        container.classList.add('fullscreen');
-                        closeBtn.style.display = 'block';
-                    }
-                }, 100);
-            };
-            
-            document.body.appendChild(script);
-        })
-        .catch(err => {
-            console.error("Fetch failed for " + configPath, err);
-            // Fallback so the game still tries to load if the JSON fails
-            const script = document.createElement('script');
-            script.src = officialCDN + 'loader.js';
-            document.body.appendChild(script);
-        });
+    // Use a simpler script load without the fetch wrapper to stop the Aborted(undefined) crash
+    const script = document.createElement('script');
+    script.src = officialCDN + 'loader.js';
+    
+    script.onload = () => {
+        const checkLoaded = setInterval(() => {
+            if (window.EJS_loaded) {
+                clearInterval(checkLoaded);
+                container.classList.add('fullscreen');
+                closeBtn.style.display = 'block';
+            }
+        }, 100);
+    };
+    
+    document.body.appendChild(script);
 }
 </script>
 
