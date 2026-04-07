@@ -209,23 +209,22 @@ function loadGame(system, url) {
 
     gameDiv.innerHTML = '';
     
-    // Completely nuke existing scripts to clear memory
+    // Nuke any existing emulator traces
+    if (window.EJS_emulator) window.EJS_emulator.stop();
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
+    // Set the variables
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
     if (system === 'sega32x') {
-        // THE "TRICK"
-        // We set the internal system name to 'genesis' so the UI uses Genesis labels
         window.EJS_core = 'picodrive';
-        window.EJS_gameID = 'genesis'; 
+        window.EJS_gameID = 'genesis'; // This MUST be 'genesis' for ABC buttons
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
-    } 
-    else {
+    } else {
         let coreName = system;
         if (system === 'mame') coreName = 'mame2003_plus';
         if (system === 'genesis') coreName = 'genesis_plus_gx';
@@ -235,30 +234,25 @@ function loadGame(system, url) {
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
     }
 
-    const script = document.createElement('script');
-    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-    
-    script.onload = () => {
-        const checkLoaded = setInterval(() => {
-            if (window.EJS_loaded) {
-                clearInterval(checkLoaded);
-                
-                // FORCE THE LABELS ONE LAST TIME VIA DOM INJECTION
-                // If the emulator won't do it, we wait for it to load and then poke it
-                setTimeout(() => {
-                    if(window.EJS_emulator) {
-                        console.log("Attempting manual control sync...");
-                    }
-                }, 1000);
-
-                container.classList.add('fullscreen');
-                closeBtn.style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'auto' });
-                closeBtn.onclick = () => location.reload();
-            }
-        }, 100);
-    };
-    document.body.appendChild(script);
+    // THE CHROMEBOOK WORKAROUND: 
+    // Wait 50ms before injecting the script to ensure the window variables are locked in.
+    setTimeout(() => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js?cachebust=' + Date.now();
+        
+        script.onload = () => {
+            const checkLoaded = setInterval(() => {
+                if (window.EJS_loaded) {
+                    clearInterval(checkLoaded);
+                    container.classList.add('fullscreen');
+                    closeBtn.style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'auto' });
+                    closeBtn.onclick = () => location.reload();
+                }
+            }, 100);
+        };
+        document.body.appendChild(script);
+    }, 50);
 }
 </script>
     
