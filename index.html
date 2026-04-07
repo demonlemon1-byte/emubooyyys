@@ -224,53 +224,54 @@ function loadGame(system, url) {
     // Updated path to use the CORE name for the folder and file
     const configPath = `${myDataRepo}system/${coreName}/${coreName}.json?v=${Date.now()}`;
 
-    fetch(configPath)
-        .then(response => response.json())
-        .then(customConfig => {
-            console.log("JSON Data Loaded for core: " + coreName);
+fetch(configPath)
+    .then(response => response.json())
+    .then(customConfig => {
+        console.log("JSON Data Loaded. Attempting Pre-emptive strike...");
 
-            window.EJS_player = '#game';
-            window.EJS_gameUrl = url;
-            window.EJS_startOnLoaded = true;
-            window.EJS_core = coreName;
-            window.EJS_gameID = coreName; // Use core name as ID to be safe
-            window.EJS_pathtodata = officialCDN;
-            window.EJS_system = configPath;
+        // Define the labels
+        const segaLabels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
 
-            // --- THE PERSISTENT INJECTION ---
-window.EJS_onGameStart = () => {
-    console.log("Initiating Deep Scan injection...");
-    let attempts = 0;
-    const labels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
-    
-    const forceLabels = setInterval(() => {
-        if (window.EJS_emulator) {
-            // 1. Standard property
-            window.EJS_emulator.buttons = labels;
-            
-            // 2. Settings/Config properties (used in newer versions)
-            if (window.EJS_emulator.config) {
-                window.EJS_emulator.config.buttons = labels;
-                window.EJS_emulator.config.buttonNames = labels;
+        // Set the standard variables
+        window.EJS_player = '#game';
+        window.EJS_gameUrl = url;
+        window.EJS_core = coreName;
+        window.EJS_gameID = coreName; 
+        window.EJS_pathtodata = officialCDN;
+        window.EJS_system = configPath;
+        window.EJS_startOnLoaded = true;
+
+        // NEW: Pre-defining the settings object before the script loads
+        window.EJS_settings = {
+            buttons: segaLabels,
+            key_bins: segaLabels
+        };
+
+        // NEW: Forcing the buttons into the global EJS object
+        window.EJS_buttons = segaLabels;
+
+        const script = document.createElement('script');
+        script.src = officialCDN + 'loader.js';
+        document.body.appendChild(script);
+
+        // Keep the injection loop as a backup just in case
+        window.EJS_onGameStart = () => {
+            console.log("Game started. Applying RAM override...");
+            if (window.EJS_emulator) {
+                window.EJS_emulator.buttons = segaLabels;
             }
+        };
 
-            // 3. The 'Core' specific settings
-            if (window.EJS_emulator.coreConfig) {
-                window.EJS_emulator.coreConfig.buttons = labels;
-            }
-
-            // 4. Force a UI refresh check if it exists
-            if (typeof window.EJS_emulator.refreshControls === 'function') {
-                window.EJS_emulator.refreshControls();
-            }
-
-            console.log("Labels forced (Attempt " + (attempts + 1) + ")");
-        }
-        attempts++;
-        if (attempts > 20) clearInterval(forceLabels); // Increased attempts
-    }, 500);
-};
-            
+        script.onload = () => {
+            const checkLoaded = setInterval(() => {
+                if (window.EJS_loaded) {
+                    clearInterval(checkLoaded);
+                    container.classList.add('fullscreen');
+                    closeBtn.style.display = 'block';
+                }
+            }, 100);
+        };
+    })            
             const script = document.createElement('script');
             script.src = officialCDN + 'loader.js';
             document.body.appendChild(script);
