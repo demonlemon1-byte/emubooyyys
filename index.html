@@ -238,21 +238,38 @@ function loadGame(system, url) {
             window.EJS_system = configPath;
 
             // --- THE PERSISTENT INJECTION ---
-            window.EJS_onGameStart = () => {
-                console.log("Game started. Enforcing " + coreName + " labels...");
-                let attempts = 0;
-                const forceLabels = setInterval(() => {
-                    if (window.EJS_emulator) {
-                        // The specific Sega layout
-                        const segaButtons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
-                        
-                        window.EJS_emulator.buttons = segaButtons;
-                        console.log("Labels forced (Attempt " + (attempts + 1) + ")");
-                    }
-                    attempts++;
-                    if (attempts > 10) clearInterval(forceLabels);
-                }, 500);
-            };
+window.EJS_onGameStart = () => {
+    console.log("Initiating Deep Scan injection...");
+    let attempts = 0;
+    const labels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+    
+    const forceLabels = setInterval(() => {
+        if (window.EJS_emulator) {
+            // 1. Standard property
+            window.EJS_emulator.buttons = labels;
+            
+            // 2. Settings/Config properties (used in newer versions)
+            if (window.EJS_emulator.config) {
+                window.EJS_emulator.config.buttons = labels;
+                window.EJS_emulator.config.buttonNames = labels;
+            }
+
+            // 3. The 'Core' specific settings
+            if (window.EJS_emulator.coreConfig) {
+                window.EJS_emulator.coreConfig.buttons = labels;
+            }
+
+            // 4. Force a UI refresh check if it exists
+            if (typeof window.EJS_emulator.refreshControls === 'function') {
+                window.EJS_emulator.refreshControls();
+            }
+
+            console.log("Labels forced (Attempt " + (attempts + 1) + ")");
+        }
+        attempts++;
+        if (attempts > 20) clearInterval(forceLabels); // Increased attempts
+    }, 500);
+};
             
             const script = document.createElement('script');
             script.src = officialCDN + 'loader.js';
