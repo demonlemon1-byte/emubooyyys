@@ -216,20 +216,21 @@ function loadGame(system, url) {
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
-    if (system === 'sega32x') {
+if (system === 'sega32x') {
         window.EJS_core = 'picodrive';
-        // Use CDN for the engine to fix the black screen
         window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-        // FORCE the 32X to use the Genesis control layout specifically
+        
+        // Use THIS line to force Genesis 6-button labels
+        window.EJS_gameID = 'genesis'; 
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/genesis.json';
         
-        // BIOS mapping for 32X specifically
         window.EJS_bios = {
             "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
             "32X_M_BIOS.bin": "32x/bios/32X - Master BIOS.bin",
             "32X_S_BIOS.bin": "32x/bios/32X - Slave BIOS.bin"
         };
-    } else {
+    
+else {
         window.EJS_core = system; // Mapping for nes, snes, etc.
         window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
         window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
