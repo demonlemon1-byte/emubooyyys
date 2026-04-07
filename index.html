@@ -215,26 +215,24 @@ function loadGame(system, url) {
     window.EJS_startOnLoaded = true;
     window.EJS_forceLegacyCores = false;
 
-    // Use your repo for the data path
     const myData = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
 
-    if (system === 'sega32x') {
-        window.EJS_core = 'picodrive';
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-        
-        // POINT TO YOUR NEW CUSTOM JSON
-        window.EJS_gameID = 'sega32x'; 
-        window.EJS_system = myData + 'system/sega32x.json?v=' + Date.now();
-    } 
-    else {
-        let coreName = system;
-        if (system === 'mame') coreName = 'mame2003_plus';
-        if (system === 'genesis') coreName = 'genesis_plus_gx';
-        
-        window.EJS_core = coreName;
-        window.EJS_pathtodata = myData;
-        window.EJS_system = 'controls/32x/' + system + '.json';
-    }
+    // 1. Map the System to the Core Name
+    let coreName = system;
+    if (system === 'mame') coreName = 'mame2003_plus';
+    if (system === 'genesis' || system === 'sega32x') coreName = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
+
+    // 2. Dynamic Pathing: Look for [system]/[system].json
+    // Example: For 'nes', it looks for .../data/system/nes/nes.json
+    // Example: For 'sega32x', it looks for .../data/system/sega32x/sega32x.json
+    const systemConfigPath = `${myData}system/${system}/${system}.json?v=${Date.now()}`;
+
+    window.EJS_core = coreName;
+    window.EJS_gameID = system; 
+    window.EJS_system = systemConfigPath;
+
+    // 3. Handle Pathtodata (32X needs CDN BIOS usually, others use your repo)
+    window.EJS_pathtodata = (system === 'sega32x') ? 'https://cdn.emulatorjs.org/stable/data/' : myData;
 
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
