@@ -209,36 +209,37 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // Clear previous instance
     gameDiv.innerHTML = '';
 
-    // 1. CORE MAPPING
-    // This ensures the right 'engine' is called for each system name
     const coreMap = {
         nes: 'fceumm',
         snes: 'snes9x',
         genesis: 'genesis_plus_gx',
-        sega32x: 'picodrive', // 32X needs picodrive to work
+        sega32x: 'picodrive',
         mame: 'mame2003_plus',
         gb: 'gambatte',
         gba: 'mgba'
     };
 
-    // 2. EMULATOR CONFIGURATION
     window.EJS_player = '#game';
-    window.EJS_core = coreMap[system] || system; 
+    window.EJS_core = coreMap[system] || system;
     window.EJS_gameUrl = url;
-    
-    // Path to your local cores and data
-    window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-    
-    // Path to the CDN ONLY for the button labels (fixes "Button 1" bug)
+    window.EJS_startOnLoaded = true;
+    window.EJS_forceLegacyCores = false;
+
+    // --- THE SWITCH ---
+    if (system === 'sega32x') {
+        // Use CDN for 32X to fix the black screen/core issues
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+    } else {
+        // Use your GitHub for everything else
+        window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
+    }
+
+    // Always use CDN for system layouts (Fixes the "Button 1" bug)
     window.EJS_system = 'https://cdn.emulatorjs.org/stable/data/system/' + system + '.json';
 
-    window.EJS_startOnLoaded = true;
-    window.EJS_forceLegacyCores = false; // Set to false to avoid the .data error
-
-    // 3. 32X BIOS CONFIGURATION
+    // Define BIOS (The CDN has these internally, but we'll define them just in case)
     if (system === 'sega32x') {
         window.EJS_bios = {
             "32X_G_BIOS.bin": "32x/bios/32X - Genesis BIOS.bin",
@@ -247,8 +248,7 @@ function loadGame(system, url) {
         };
     }
 
-    // 4. SCRIPT LOADING
-    // We use the CDN loader because it's the most compatible with the .json configs
+    // Load the Engine
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
     
@@ -258,21 +258,14 @@ function loadGame(system, url) {
                 clearInterval(checkLoaded);
                 container.classList.add('fullscreen');
                 closeBtn.style.display = 'block';
-                
-                // Ensure page stays at the top for the game window
                 window.scrollTo({ top: 0, behavior: 'auto' });
-
-                // Refresh on close to ensure the next game load is "clean"
-                closeBtn.onclick = () => {
-                    location.reload();
-                };
+                closeBtn.onclick = () => location.reload();
             }
         }, 100);
     };
-
     document.body.appendChild(script);
 }
-
+    
 </script>
 
 </body>
