@@ -208,7 +208,10 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    if (window.EJS_emulator) { try { window.EJS_emulator.stop(); } catch(e) {} }
+    // 1. Kill any zombie instances
+    if (window.EJS_emulator) {
+        try { window.EJS_emulator.stop(); } catch(e) {}
+    }
     gameDiv.innerHTML = '';
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
@@ -216,24 +219,29 @@ function loadGame(system, url) {
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
     const configPath = `${myDataRepo}system/${system}/${system}.json?v=${Date.now()}`;
 
-    // 1. MANUALLY FETCH YOUR JSON FIRST
+    // 2. The Fetch & Inject Logic
     fetch(configPath)
         .then(response => response.json())
         .then(customConfig => {
-            console.log("Successfully grabbed custom labels!");
-            
+            console.log("JSON Data Loaded.");
+
             window.EJS_player = '#game';
             window.EJS_gameUrl = url;
             window.EJS_startOnLoaded = true;
             window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
             window.EJS_gameID = system;
             window.EJS_pathtodata = officialCDN;
-            
-            // This is the important part:
-            // We tell the emulator to use our ALREADY FETCHED data
             window.EJS_system = configPath;
 
-            // 2. NOW LOAD THE EMULATOR
+            // --- THE RAM INJECTION ---
+            // This runs the moment the game boots, forcing the labels into the UI
+            window.EJS_onGameStart = () => {
+                if (window.EJS_emulator) {
+                    console.log("Overwriting labels in RAM...");
+                    window.EJS_emulator.buttons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+                }
+            };
+
             const script = document.createElement('script');
             script.src = officialCDN + 'loader.js';
             document.body.appendChild(script);
@@ -248,11 +256,7 @@ function loadGame(system, url) {
                 }, 100);
             };
         })
-        .catch(err => {
-            console.error("The browser refused to fetch the JSON:", err);
-            // Fallback: If fetch fails, just try to load the game anyway
-            alert("Could not load custom button labels. Using defaults.");
-        });
+        .catch(err => console.error("Fetch failed:", err));
 }
 </script>    
 
