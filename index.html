@@ -218,64 +218,47 @@ function loadGame(system, url) {
     const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
 
-    // Determine the core name based on the system
+    // Determine the core name
     const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
     
-    // Updated path to use the CORE name for the folder and file
+    // Updated path to use the CORE name
     const configPath = `${myDataRepo}system/${coreName}/${coreName}.json?v=${Date.now()}`;
 
-fetch(configPath)
-    .then(response => response.json())
-    .then(customConfig => {
-        console.log("JSON Data Loaded. Attempting Pre-emptive strike...");
+    fetch(configPath)
+        .then(response => response.json())
+        .then(customConfig => {
+            console.log("JSON Data Loaded. Attempting Pre-emptive strike...");
 
-        // Define the labels
-        const segaLabels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+            const segaLabels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
 
-        // Set the standard variables
-        window.EJS_player = '#game';
-        window.EJS_gameUrl = url;
-        window.EJS_core = coreName;
-        window.EJS_gameID = coreName; 
-        window.EJS_pathtodata = officialCDN;
-        window.EJS_system = configPath;
-        window.EJS_startOnLoaded = true;
+            // Set the standard variables
+            window.EJS_player = '#game';
+            window.EJS_gameUrl = url;
+            window.EJS_core = coreName;
+            window.EJS_gameID = coreName; 
+            window.EJS_pathtodata = officialCDN;
+            window.EJS_system = configPath;
+            window.EJS_startOnLoaded = true;
 
-        // NEW: Pre-defining the settings object before the script loads
-        window.EJS_settings = {
-            buttons: segaLabels,
-            key_bins: segaLabels
-        };
+            // PRE-EMPTIVE OVERRIDES
+            window.EJS_settings = {
+                buttons: segaLabels,
+                key_bins: segaLabels
+            };
+            window.EJS_buttons = segaLabels;
 
-        // NEW: Forcing the buttons into the global EJS object
-        window.EJS_buttons = segaLabels;
-
-        const script = document.createElement('script');
-        script.src = officialCDN + 'loader.js';
-        document.body.appendChild(script);
-
-        // Keep the injection loop as a backup just in case
-        window.EJS_onGameStart = () => {
-            console.log("Game started. Applying RAM override...");
-            if (window.EJS_emulator) {
-                window.EJS_emulator.buttons = segaLabels;
-            }
-        };
-
-        script.onload = () => {
-            const checkLoaded = setInterval(() => {
-                if (window.EJS_loaded) {
-                    clearInterval(checkLoaded);
-                    container.classList.add('fullscreen');
-                    closeBtn.style.display = 'block';
+            // BACKUP RAM INJECTION
+            window.EJS_onGameStart = () => {
+                console.log("Game started. Applying RAM override...");
+                if (window.EJS_emulator) {
+                    window.EJS_emulator.buttons = segaLabels;
                 }
-            }, 100);
-        };
-    })            
+            };
+
+            // Only create and append the script ONCE inside the successful fetch
             const script = document.createElement('script');
             script.src = officialCDN + 'loader.js';
-            document.body.appendChild(script);
-
+            
             script.onload = () => {
                 const checkLoaded = setInterval(() => {
                     if (window.EJS_loaded) {
@@ -285,10 +268,15 @@ fetch(configPath)
                     }
                 }, 100);
             };
+            
+            document.body.appendChild(script);
         })
         .catch(err => {
             console.error("Fetch failed for " + configPath, err);
-            // If the fetch fails, you might need to rename your files on GitHub to match the coreName
+            // Fallback so the game still tries to load if the JSON fails
+            const script = document.createElement('script');
+            script.src = officialCDN + 'loader.js';
+            document.body.appendChild(script);
         });
 }
 </script>
