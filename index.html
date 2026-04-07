@@ -208,7 +208,6 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // Kill any existing emulator instance to prevent GLctx crashes
     if (window.EJS_emulator) {
         try { window.EJS_emulator.stop(); } catch(e) {}
     }
@@ -219,19 +218,22 @@ function loadGame(system, url) {
     window.EJS_gameUrl = url;
     window.EJS_startOnLoaded = true;
 
-    // Your external repo for custom button labels
+    // --- THE INJECTION HACK STARTS HERE ---
+    window.EJS_onGameStart = () => {
+        if (window.EJS_emulator && (system === 'sega32x' || system === 'genesis')) {
+            console.log("Force-injecting Sega labels...");
+            window.EJS_emulator.buttons = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
+        }
+    };
+    // --- END OF HACK ---
+
     const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
-    // The official CDN for the heavy WASM/Core files (prevents CORS/Aborted errors)
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
 
     if (system === 'sega32x' || system === 'genesis') {
         window.EJS_core = (system === 'sega32x') ? 'picodrive' : 'genesis_plus_gx';
         window.EJS_gameID = system;
-        
-        // Use YOUR custom JSON for the A, B, C labels
         window.EJS_system = `${myDataRepo}system/${system}/${system}.json?v=${Date.now()}`;
-        
-        // Use the OFFICIAL CDN for the core files to stop the "Aborted" error
         window.EJS_pathtodata = officialCDN;
     } else {
         window.EJS_core = system;
