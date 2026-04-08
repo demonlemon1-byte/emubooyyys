@@ -208,43 +208,43 @@ p.description {
 function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
-    const placeholder = document.getElementById('placeholder-text');
 
-    // Kill previous instance if it exists
+    // 1. Properly stop and clear previous instances
     if (window.EJS_emulator) {
-        try { window.EJS_emulator.stop(); } catch(e) {}
+        try { 
+            window.EJS_emulator.stop(); 
+            window.EJS_emulator = null;
+        } catch(e) { console.error("Error stopping emulator:", e); }
     }
 
-    // Hide the placeholder text and clear the container
-    if (placeholder) placeholder.style.display = 'none';
+    // 2. Clear the container for the new canvas
     gameDiv.innerHTML = '';
     
-    // Remove old loader scripts to prevent Aborted/conflict errors
+    // 3. Remove existing loader scripts to avoid re-declaration conflicts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
-    
-    // Cache bust forces the browser to pull your latest edits from GitHub
-    const bust = "?v=" + Date.now();
-
-    window.EJS_player = '#game';
-    window.EJS_gameUrl = url;
-    window.EJS_core = coreName;
-    window.EJS_pathtodata = './emulatorjs/data/' + bust;
-    window.EJS_startOnLoaded = true;
-
-    window.EJS_config = {
-        showControls: true,
-        startOnLoaded: true,
-        // Forcing the core to recognize 6 buttons instead of 3
-        coreConfig: {
-            "genesis_plus_gx_device_p1": "6Button Pad",
-            "genesis_plus_gx_device_p2": "6Button Pad"
-        }
+    // 4. Configuration
+    const coreMapping = {
+        'sega32x': 'picodrive',
+        'genesis': 'genesis_plus_gx',
+        'nes': 'fceumm', // Recommended NES core
+        'snes': 'snes9x', // Recommended SNES core
+        'gb': 'gambatte'  // Recommended GB core
     };
 
+    const coreName = coreMapping[system] || system;
+    const bust = "?v=" + Date.now();
+
+    // Set globals
+    window.EJS_player = '#game'; 
+    window.EJS_gameUrl = url;
+    window.EJS_core = coreName;
+    window.EJS_pathtodata = 'emulatorjs/data/'; // Ensure this folder exists!
+    window.EJS_startOnLoaded = true;
+
+    // 5. Build and append the script
     const script = document.createElement('script');
-    script.src = './emulatorjs/data/loader.js' + bust;
+    script.src = 'emulatorjs/data/loader.js' + bust;
     
     script.onload = () => {
         closeBtn.style.display = 'block';
@@ -252,7 +252,6 @@ function loadGame(system, url) {
     
     document.body.appendChild(script);
 }
-</script>
     
 </body>
 </html>
