@@ -1,21 +1,17 @@
 {
-    "controls": [
-        {
-            "name": "Sega Genesis",
-            "buttons": [
-                "B",
-                "C",
-                "A",
-                "START",
-                "UP",
-                "DOWN",
-                "LEFT",
-                "RIGHT",
-                "X",
-                "Y",
-                "Z",
-                "MODE"
-            ]
-        }
-    ]
+  "name": "Sega Genesis",
+  "mapping": {
+    "A": "Button A",
+    "B": "Button B",
+    "C": "Button C",
+    "X": "Button X",
+    "Y": "Button Y",
+    "Z": "Button Z",
+    "START": "Start",
+    "MODE": "Mode",
+    "UP": "D-Pad Up",
+    "DOWN": "D-Pad Down",
+    "LEFT": "D-Pad Left",
+    "RIGHT": "D-Pad Right"
+  }
 }
