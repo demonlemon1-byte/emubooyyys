@@ -217,8 +217,14 @@ function loadGame(system, url) {
     const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
     const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
-    const configPath = `${myDataRepo}system/${coreName}/${coreName}.json?v=${Date.now()}`;
 
+// Ensure this path matches your repo structure exactly
+    const configPath = `./emulatorjs/data/system/${coreName}/${coreName}.json`;
+
+window.EJS_config = {
+    externalConfig: configPath
+};
+    
     // We skip the fetch and define EVERYTHING globally first
     const segaLabels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
 
