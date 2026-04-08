@@ -207,6 +207,7 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
+    // Clean up previous instance
     if (window.EJS_emulator) {
         try { window.EJS_emulator.stop(); } catch(e) {}
     }
@@ -215,31 +216,26 @@ function loadGame(system, url) {
 
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
     const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
-    
-    // Relative path to your local config files
-    const configPath = `./emulatorjs/data/system/${coreName}/${coreName}.json`;
 
-    // 1. Define Basic Global Settings
+    // MANDATORY GLOBAL SETTINGS
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_core = coreName;
-    window.EJS_gameID = coreName; 
-    window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/emubooyyys/emulatorjs/data/';
+    window.EJS_pathtodata = officialCDN; // Stick to CDN for stability
     window.EJS_startOnLoaded = true;
 
-    // 2. Combine EVERYTHING into ONE config object
-    const segaLabels = ["A", "B", "C", "X", "Y", "Z", "Start", "Mode", "Up", "Down", "Left", "Right"];
-    
+    // THE FIX: Define the mapping directly here
+    // This overrides the "BUTTON 1 / BUTTON 2" labels you see in your screenshot
+    let segaButtons = ["A", "B", "C", "X", "Y", "Z", "Start", "Mode", "Up", "Down", "Left", "Right"];
+
     window.EJS_config = {
-        systemName: coreName,
-        externalConfig: configPath,
         showControls: true,
         startOnLoaded: true,
-        // Only apply the 6-button label list if it's a Sega system
-        buttons: (system === 'genesis' || system === 'sega32x') ? segaLabels : undefined
+        systemName: coreName,
+        // This is the "secret sauce" to change those labels in your screenshot
+        buttons: (system === 'genesis' || system === 'sega32x') ? segaButtons : undefined
     };
 
-    // 3. Load the Script
     const script = document.createElement('script');
     script.src = officialCDN + 'loader.js';
     
@@ -252,7 +248,6 @@ function loadGame(system, url) {
             }
         }, 100);
     };
-    
     document.body.appendChild(script);
 }
 </script>
