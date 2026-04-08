@@ -194,7 +194,7 @@ p.description {
 function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     
-    // 1. Stop previous instances
+    // 1. Stop and Clean Up
     if (window.EJS_emulator) {
         try { 
             window.EJS_emulator.stop(); 
@@ -202,16 +202,30 @@ function loadGame(system, url) {
         } catch(e) { console.error("Error stopping emulator:", e); }
     }
 
-    // 2. Clear the container
     gameDiv.innerHTML = '';
-    
-    // 3. Remove old loader scripts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    // 4. Configuration
+    // 2. Performance Settings
+    window.EJS_Settings = {
+        threads: true,
+        quality: 'low', // Great for performance on web
+        wait_for_interaction: false
+    };
+
+    // 3. Clear/Set Core Configs 
+    // This prevents Genesis settings from messing up NES/SNES
+    window.EJS_coreConfig = {}; 
+    if (system === 'genesis') {
+        window.EJS_coreConfig = {
+            "genesis_plus_gx_overscan": "disabled",
+            "genesis_plus_gx_render": "single field" 
+        };
+    }
+
+    // 4. Core Selection
     const coreMapping = {
         'sega32x': 'picodrive',
-        'genesis': 'genesis_plus_gx',
+        'genesis': 'picodrive', // Changed to picodrive for better speed on Sonic 3
         'nes': 'fceumm',
         'snes': 'snes9x',
         'gb': 'gambatte'
@@ -220,21 +234,16 @@ function loadGame(system, url) {
     const coreName = coreMapping[system] || system;
     const bust = "?v=" + Date.now();
 
-    // Set globals - Pointing to 'emulatorjs/' based on your screenshot
+    // 5. Global Config
     window.EJS_player = '#game'; 
     window.EJS_gameUrl = url;
     window.EJS_core = coreName;
     window.EJS_pathtodata = 'emulatorjs/data/'; 
     window.EJS_startOnLoaded = true;
 
-    // 5. Build and append the script
+    // 6. Execution
     const script = document.createElement('script');
     script.src = 'emulatorjs/data/loader.js' + bust;
-    
-    script.onload = () => {
-        closeBtn.style.display = 'block';
-    };
-    
     document.body.appendChild(script);
 }
 </script> 
