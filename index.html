@@ -244,7 +244,7 @@ function loadGame(system, url) {
 
     // 5. Build and append the script
     const script = document.createElement('script');
-    script.src = 'emulatorjs/loader.js' + bust;
+    script.src = 'emulatorjs/data/loader.js' + bust;
     
     script.onload = () => {
         closeBtn.style.display = 'block';
