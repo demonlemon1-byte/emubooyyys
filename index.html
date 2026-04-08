@@ -203,60 +203,38 @@ p.description {
 
 <script>
 function loadGame(system, url) {
-    const container = document.getElementById('game-container');
-    const gameDiv = document.getElementById('game');
-    const closeBtn = document.getElementById('close-game-btn');
-
-    // Kill any existing emulator instance
-    if (window.EJS_emulator) {
-        try { window.EJS_emulator.stop(); } catch(e) {}
-    }
-    gameDiv.innerHTML = '';
-    
-    // Remove old loader scripts to prevent conflicts
-    document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
-
-    const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
-    
-    // FULL LOCAL PATHS
-    // This assumes your HTML is in the root and EmulatorJS is in /emulatorjs/data/
-    const localDataPath = './emulatorjs/data/'; 
-    const localConfigPath = `${localDataPath}system/${coreName}/${coreName}.json`;
-
-    // 1. Setup Global Variables
+    // 1. Setup the basic requirements
     window.EJS_player = '#game';
-    window.EJS_gameUrl = url; // Path to your ROM
-    window.EJS_core = coreName;
-    window.EJS_pathtodata = localDataPath; // <--- THE MOST IMPORTANT LINE
+    window.EJS_gameUrl = url;
+    window.EJS_core = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
+    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
     window.EJS_startOnLoaded = true;
 
-    // 2. Setup the Config Object
-    // We define the 6-button layout for Sega here to override any local JSON mistakes
+    // 2. THE INJECTION: We define the buttons here. 
+    // This tells the UI to use these labels instead of "Button 1"
     const segaLabels = ["A", "B", "C", "X", "Y", "Z", "Start", "Mode", "Up", "Down", "Left", "Right"];
 
     window.EJS_config = {
-        systemName: coreName,
-        externalConfig: localConfigPath,
         showControls: true,
-        startOnLoaded: true,
-        buttons: (system === 'genesis' || system === 'sega32x') ? segaLabels : undefined
+        buttons: (system === 'genesis' || system === 'sega32x') ? segaLabels : undefined,
+        // We leave externalConfig BLANK so it doesn't look for a missing file
+        externalConfig: undefined 
     };
 
-    // 3. Load the LOCAL loader.js
+    // 3. Clean up and Load
+    const gameDiv = document.getElementById('game');
+    gameDiv.innerHTML = '';
+    document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
+
     const script = document.createElement('script');
-    script.src = `${localDataPath}loader.js`; // Pulling from your repo, not the CDN
-    
-    script.onload = () => {
-        const checkLoaded = setInterval(() => {
-            if (window.EJS_loaded) {
-                clearInterval(checkLoaded);
-                container.classList.add('fullscreen');
-                closeBtn.style.display = 'block';
-            }
-        }, 100);
-    };
-    
+    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
     document.body.appendChild(script);
+    
+    // UI Visuals
+    script.onload = () => {
+        document.getElementById('game-container').classList.add('fullscreen');
+        document.getElementById('close-game-btn').style.display = 'block';
+    };
 }
 </script>
 
