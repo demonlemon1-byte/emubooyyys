@@ -206,12 +206,11 @@ function loadGame(system, url) {
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
     // 2. Performance Settings
-    window.EJS_Settings = {
-        threads: true,
-        quality: 'low', // Great for performance on web
-        wait_for_interaction: false
-    };
-
+window.EJS_Settings = {
+    threads: false, // Turn this OFF to see if the conflict stops
+    quality: 'low',
+    wait_for_interaction: false
+};
     // 3. Clear/Set Core Configs 
     // This prevents Genesis settings from messing up NES/SNES
     window.EJS_coreConfig = {}; 
