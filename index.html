@@ -202,7 +202,6 @@ p.description {
 </div>
 
 <script>
-
 function loadGame(system, url) {
     const container = document.getElementById('game-container');
     const gameDiv = document.getElementById('game');
@@ -214,34 +213,33 @@ function loadGame(system, url) {
     gameDiv.innerHTML = '';
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    const myDataRepo = 'https://demonlemon1-byte.github.io/deepakrummy.github.io-for-taking-/storage/emulatorjs/data/';
     const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
     const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
-
-// Ensure this path matches your repo structure exactly
+    
+    // Relative path to your local config files
     const configPath = `./emulatorjs/data/system/${coreName}/${coreName}.json`;
 
-window.EJS_config = {
-    externalConfig: configPath
-};
-    
-    // We skip the fetch and define EVERYTHING globally first
-    const segaLabels = ["B", "C", "A", "START", "UP", "DOWN", "LEFT", "RIGHT", "X", "Y", "Z", "MODE"];
-
+    // 1. Define Basic Global Settings
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_core = coreName;
     window.EJS_gameID = coreName; 
     window.EJS_pathtodata = 'https://demonlemon1-byte.github.io/emubooyyys/emulatorjs/data/';
     window.EJS_startOnLoaded = true;
+
+    // 2. Combine EVERYTHING into ONE config object
+    const segaLabels = ["A", "B", "C", "X", "Y", "Z", "Start", "Mode", "Up", "Down", "Left", "Right"];
     
-    // This is the "God Mode" config object for EmulatorJS
-window.EJS_config = {
-    externalConfig: configPath,
-    showControls: true,
-    startOnLoaded: true
-};
-    // Use a simpler script load without the fetch wrapper to stop the Aborted(undefined) crash
+    window.EJS_config = {
+        systemName: coreName,
+        externalConfig: configPath,
+        showControls: true,
+        startOnLoaded: true,
+        // Only apply the 6-button label list if it's a Sega system
+        buttons: (system === 'genesis' || system === 'sega32x') ? segaLabels : undefined
+    };
+
+    // 3. Load the Script
     const script = document.createElement('script');
     script.src = officialCDN + 'loader.js';
     
