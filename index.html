@@ -209,7 +209,7 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // 1. Properly stop and clear previous instances
+    // 1. Stop previous instances
     if (window.EJS_emulator) {
         try { 
             window.EJS_emulator.stop(); 
@@ -217,34 +217,34 @@ function loadGame(system, url) {
         } catch(e) { console.error("Error stopping emulator:", e); }
     }
 
-    // 2. Clear the container for the new canvas
+    // 2. Clear the container
     gameDiv.innerHTML = '';
     
-    // 3. Remove existing loader scripts to avoid re-declaration conflicts
+    // 3. Remove old loader scripts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
     // 4. Configuration
     const coreMapping = {
         'sega32x': 'picodrive',
         'genesis': 'genesis_plus_gx',
-        'nes': 'fceumm', // Recommended NES core
-        'snes': 'snes9x', // Recommended SNES core
-        'gb': 'gambatte'  // Recommended GB core
+        'nes': 'fceumm',
+        'snes': 'snes9x',
+        'gb': 'gambatte'
     };
 
     const coreName = coreMapping[system] || system;
     const bust = "?v=" + Date.now();
 
-    // Set globals
+    // Set globals - Pointing to 'emulatorjs/' based on your screenshot
     window.EJS_player = '#game'; 
     window.EJS_gameUrl = url;
     window.EJS_core = coreName;
-    window.EJS_pathtodata = 'emulatorjs/data/'; // Ensure this folder exists!
+    window.EJS_pathtodata = 'emulatorjs/'; 
     window.EJS_startOnLoaded = true;
 
     // 5. Build and append the script
     const script = document.createElement('script');
-    script.src = 'emulatorjs/data/loader.js' + bust;
+    script.src = 'emulatorjs/loader.js' + bust;
     
     script.onload = () => {
         closeBtn.style.display = 'block';
@@ -252,7 +252,6 @@ function loadGame(system, url) {
     
     document.body.appendChild(script);
 }
-<script>
-    
+</script> 
 </body>
 </html>
