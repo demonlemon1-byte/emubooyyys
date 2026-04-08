@@ -207,37 +207,44 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // Clean up previous instance
+    // Kill any existing emulator instance
     if (window.EJS_emulator) {
         try { window.EJS_emulator.stop(); } catch(e) {}
     }
     gameDiv.innerHTML = '';
+    
+    // Remove old loader scripts to prevent conflicts
     document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
 
-    const officialCDN = 'https://cdn.emulatorjs.org/stable/data/';
     const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
+    
+    // FULL LOCAL PATHS
+    // This assumes your HTML is in the root and EmulatorJS is in /emulatorjs/data/
+    const localDataPath = './emulatorjs/data/'; 
+    const localConfigPath = `${localDataPath}system/${coreName}/${coreName}.json`;
 
-    // MANDATORY GLOBAL SETTINGS
+    // 1. Setup Global Variables
     window.EJS_player = '#game';
-    window.EJS_gameUrl = url;
+    window.EJS_gameUrl = url; // Path to your ROM
     window.EJS_core = coreName;
-    window.EJS_pathtodata = officialCDN; // Stick to CDN for stability
+    window.EJS_pathtodata = localDataPath; // <--- THE MOST IMPORTANT LINE
     window.EJS_startOnLoaded = true;
 
-    // THE FIX: Define the mapping directly here
-    // This overrides the "BUTTON 1 / BUTTON 2" labels you see in your screenshot
-    let segaButtons = ["A", "B", "C", "X", "Y", "Z", "Start", "Mode", "Up", "Down", "Left", "Right"];
+    // 2. Setup the Config Object
+    // We define the 6-button layout for Sega here to override any local JSON mistakes
+    const segaLabels = ["A", "B", "C", "X", "Y", "Z", "Start", "Mode", "Up", "Down", "Left", "Right"];
 
     window.EJS_config = {
+        systemName: coreName,
+        externalConfig: localConfigPath,
         showControls: true,
         startOnLoaded: true,
-        systemName: coreName,
-        // This is the "secret sauce" to change those labels in your screenshot
-        buttons: (system === 'genesis' || system === 'sega32x') ? segaButtons : undefined
+        buttons: (system === 'genesis' || system === 'sega32x') ? segaLabels : undefined
     };
 
+    // 3. Load the LOCAL loader.js
     const script = document.createElement('script');
-    script.src = officialCDN + 'loader.js';
+    script.src = `${localDataPath}loader.js`; // Pulling from your repo, not the CDN
     
     script.onload = () => {
         const checkLoaded = setInterval(() => {
@@ -248,6 +255,7 @@ function loadGame(system, url) {
             }
         }, 100);
     };
+    
     document.body.appendChild(script);
 }
 </script>
