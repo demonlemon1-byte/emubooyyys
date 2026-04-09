@@ -222,7 +222,7 @@ function loadGame(system, url) {
     };
 
     const script = document.createElement('script');
-    script.src = `${repoURL}emulatorjs/loader.js`;
+    script.src = `${repoURL}emulatorjs/data/loader.js`;
     
     script.onload = () => {
         window.EJS_onGameStart = () => {
