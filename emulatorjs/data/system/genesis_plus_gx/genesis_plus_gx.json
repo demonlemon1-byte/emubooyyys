@@ -1,17 +1,22 @@
 {
   "name": "Sega Genesis",
-  "controls": [
-    {"name": "A", "target": "a"},
-    {"name": "B", "target": "b"},
-    {"name": "C", "target": "c"},
-    {"name": "X", "target": "x"},
-    {"name": "Y", "target": "y"},
-    {"name": "Z", "target": "z"},
-    {"name": "Start", "target": "start"},
-    {"name": "Mode", "target": "mode"},
-    {"name": "Up", "target": "up"},
-    {"name": "Down", "target": "down"},
-    {"name": "Left", "target": "left"},
-    {"name": "Right", "target": "right"}
-  ]
+  "settings": {
+    "lowpass": false,
+    "audio_resampler": "sinc",
+    "samplerate": 44100
+  },
+  "mapping": {
+    "A": "A",
+    "B": "B",
+    "C": "C",
+    "X": "X",
+    "Y": "Y",
+    "Z": "Z",
+    "START": "Start",
+    "MODE": "Mode",
+    "UP": "Up",
+    "DOWN": "Down",
+    "LEFT": "Left",
+    "RIGHT": "Right"
+  }
 }
