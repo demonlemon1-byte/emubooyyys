@@ -229,6 +229,14 @@ window.EJS_Settings = {
         'gb': 'gambatte'
     };
 
+window.EJS_config = {
+    externalConfig: configPath,
+    // Force the audio samplerate to a standard level
+    samplerate: 44100, 
+    // Add a slight buffer to prevent the "stuttering" jingle
+    audioBuffer: 512 
+};
+
     const coreName = coreMapping[system] || system;
     const bust = "?v=" + Date.now();
 
