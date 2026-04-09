@@ -195,30 +195,26 @@ function loadGame(system, url) {
     const gameDiv = document.getElementById('game');
     const closeBtn = document.getElementById('close-game-btn');
 
-    // 1. Define the Core and the Path immediately
     const coreName = (system === 'sega32x') ? 'picodrive' : (system === 'genesis') ? 'genesis_plus_gx' : system;
-    
-    // Using absolute URL to prevent pathing gremlins
     const repoURL = 'https://demonlemon1-byte.github.io/emubooyyys/';
-    const configPath = `${repoURL}emulatorjs/data/system/${coreName}/${coreName}.json`;
 
     if (window.EJS_emulator) {
         try { window.EJS_emulator.stop(); } catch(e) {}
     }
     gameDiv.innerHTML = '';
-    document.querySelectorAll('script[src*="loader.js"]').forEach(s => s.remove());
-
-    // 2. Set Globals
+    
+    // Set Globals
     window.EJS_player = '#game';
     window.EJS_gameUrl = url;
     window.EJS_core = coreName;
     window.EJS_pathtodata = `${repoURL}emulatorjs/data/`;
     window.EJS_startOnLoaded = true;
-    window.EJS_threads = true; // Added for better Genesis audio processing
+    
+    // CRITICAL: Set this to false. GitHub Pages cannot handle true.
+    window.EJS_threads = false; 
 
-    // 3. Apply the Config (This is where the error was happening)
     window.EJS_config = {
-        externalConfig: configPath
+        externalConfig: `${repoURL}emulatorjs/data/system/${coreName}/${coreName}.json`
     };
 
     const script = document.createElement('script');
