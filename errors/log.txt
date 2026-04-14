@@ -1,0 +1,1 @@
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://github.com/demonlemon1-byte/emubooyyys/releases/download/sMOR/Sonic.CD.U.chd. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 302.
