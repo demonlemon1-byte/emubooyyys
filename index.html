@@ -56,6 +56,17 @@
             padding: 10px;
         }
 
+        #loading-progress {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    padding: 15px 30px;
+    border-radius: 8px;
+    z-index: 10;
+}
+
         button { 
             padding: 12px; 
             background: #444; 
@@ -188,70 +199,129 @@ p.description {
         <button onclick="loadGame('sega32x', '32x/Knuckles_%20Chaotix%20(1995)(Sega)(JP-US)(en).bin')">Knuckles' Chaotix</button>
         <button onclick="loadGame('sega32x', '32x/Tempo (1995)(Sega)(JP-US)(en).bin')">Tempo</button>
 </div>
-
+    
+<div class="menu">
+    <div class="system-label">Sega CD (WIP)</div>
+    <button onclick="loadGame('segaCD', 'segacd/soniccd/Sonic CD (USA).iso', true, {min:1, max:21})">
+        Sonic CD (USA)
+    </button>
+    <!-- Add more Sega CD games here later -->
+</div>
 
 <script>
-function loadGame(system, url) {
+function loadGame(system, gamePath, isMultiPart = false, multiPartConfig = null) {
     const container = document.getElementById('game-container');
     const gameDiv = document.getElementById('game');
-    // const closeBtn = document.getElementById('close-game-btn'); // Uncomment if you add the close button later
-
-    const repoURL = 'https://demonlemon1-byte.github.io/emubooyyys/';
+    const repoURL = 'https://demonlemon1-byte.github.io/emubooyyys/'; // ← your repo
 
     // Stop any running emulator
     if (window.EJS_emulator) {
         try { window.EJS_emulator.stop(); } catch(e) {}
     }
-
     gameDiv.innerHTML = '';
 
-    // === Core Mapping (elegant and easy to extend) ===
     let coreName = system;
     let biosUrl = null;
+    let gameUrl = `${repoURL}${gamePath}`;
 
+    // === System Core & BIOS Mapping ===
     if (system === 'sega32x') {
         coreName = 'picodrive';
-        // Your existing 32X BIOS pointer goes here (example):
-        // biosUrl = `${repoURL}bios/32x_bios.zip`;   // ← adjust to your actual 32X path
-    } 
-    else if (system === 'genesis') {
+    } else if (system === 'genesis') {
         coreName = 'genesis_plus_gx';
-    } 
-    else if (system === 'segaCD') {
-        coreName = 'genesis_plus_gx';     // Best core for Sega CD in EmulatorJS (picodrive is currently broken for CD in many builds)
-        biosUrl = `${repoURL}segacdbios/segacd_bios.zip`;   // ← Your new Sega CD BIOS pointer
+    } else if (system === 'segaCD') {
+        coreName = 'genesis_plus_gx';           // best working core for CD right now
+        biosUrl = `${repoURL}segacdbios/segacd_bios.zip`; // or .bin if you prefer raw BIOS
     }
 
-    // Set EmulatorJS globals
-    window.EJS_player = '#game';
-    window.EJS_gameUrl = url;
-    window.EJS_core = coreName;
-    window.EJS_pathtodata = `${repoURL}emulatorjs/data/`;
-    window.EJS_startOnLoaded = true;
-    window.EJS_threads = false;   // Required for GitHub Pages
-
-    if (biosUrl) {
-        window.EJS_biosUrl = biosUrl;
-    } else {
-        // Clear any previous BIOS setting so it doesn't leak to other systems
-        delete window.EJS_biosUrl;
-    }
-
-    window.EJS_config = {
-        externalConfig: `${repoURL}emulatorjs/data/system/${coreName}/${coreName}.json`
-    };
-
-    const script = document.createElement('script');
-    script.src = `${repoURL}emulatorjs/data/loader.js`;
-
-    script.onload = () => {
-        window.EJS_onGameStart = () => {
-            container.classList.add('fullscreen');
-            // closeBtn.style.display = 'block'; // Uncomment when you add the button
+    // === Multi-part merging (Sonic CD style) ===
+    if (isMultiPart && multiPartConfig) {
+        const {min, max} = multiPartConfig;
+        window.gameconfig = {  // reuse the logic from the file you shared
+            url: `${repoURL}${gamePath}`,
+            min: min,
+            max: max
         };
-    };
+        
+        // Inject the mergeFiles helper
+        const mergeScript = document.createElement('script');
+        mergeScript.textContent = `
+            function getParts(baseUrl, start, end) {
+                let parts = [];
+                for (let i = start; i <= end; i++) {
+                    let padded = String(i).padStart((end+"").length, '0');
+                    parts.push(baseUrl + ".part" + padded);
+                }
+                return parts;
+            }
 
-    document.body.appendChild(script);
+            function mergeFiles(fileParts, progressCb) {
+                return new Promise((resolve, reject) => {
+                    let buffers = [];
+                    let loaded = 0;
+                    function fetchPart(index) {
+                        if (index >= fileParts.length) {
+                            const mergedBlob = new Blob(buffers);
+                            resolve(URL.createObjectURL(mergedBlob));
+                            return;
+                        }
+                        fetch(fileParts[index])
+                            .then(r => r.arrayBuffer())
+                            .then(data => {
+                                buffers.push(data);
+                                loaded++;
+                                if (progressCb) progressCb(loaded);
+                                fetchPart(index + 1);
+                            })
+                            .catch(reject);
+                    }
+                    fetchPart(0);
+                });
+            }
+        `;
+        document.head.appendChild(mergeScript);
+
+        // Show loading UI
+        gameDiv.innerHTML = `
+            <div id="loading-progress" style="color:white; font-size:1.2em; padding:20px;">
+                Loading Sega CD game... 0/${multiPartConfig.max}
+            </div>
+        `;
+
+        const parts = getParts(window.gameconfig.url, window.gameconfig.min, window.gameconfig.max);
+        
+        mergeFiles(parts, (loaded) => {
+            document.getElementById('loading-progress').textContent = 
+                `Loading Sega CD game... ${loaded}/${parts.length}`;
+        }).then(mergedUrl => {
+            document.getElementById('loading-progress').remove();
+            startEmulator(mergedUrl);
+        }).catch(err => {
+            console.error(err);
+            gameDiv.innerHTML = `<p style="color:red">Failed to load multi-part game.</p>`;
+        });
+
+        return; // don't run the normal loader yet
+    }
+
+    // Normal single-file flow
+    startEmulator(gameUrl);
+
+    function startEmulator(finalGameUrl) {
+        window.EJS_player = '#game';
+        window.EJS_gameUrl = finalGameUrl;
+        window.EJS_core = coreName;
+        window.EJS_pathtodata = `${repoURL}emulatorjs/data/`;
+        window.EJS_startOnLoaded = true;
+        window.EJS_threads = false; // GitHub Pages requirement
+
+        if (biosUrl) window.EJS_biosUrl = biosUrl;
+        else delete window.EJS_biosUrl;
+
+        const script = document.createElement('script');
+        script.src = `${repoURL}emulatorjs/data/loader.js`;
+        document.body.appendChild(script);
+    }
 }
 </script>
 </body>
