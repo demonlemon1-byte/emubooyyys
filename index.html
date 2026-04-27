@@ -206,34 +206,38 @@ p.description {
     <!-- Add USA version the same way once uploaded -->
 </div>
     
-
 <script>
-function loadGame(system, gamePath, isMultiPart = false, multiPartConfig = null) {
+function loadGame(system, gamePath) {
     const container = document.getElementById('game-container');
     const gameDiv = document.getElementById('game');
     
-    // Base for non-full-URL games (jsDelivr is fastest)
-    const repoURL = 'https://github.com/demonlemon1-byte/emubooyyys/';
+    // Base URL for normal files (jsDelivr = fastest + best caching)
+    const repoURL = 'https://cdn.jsdelivr.net/gh/demonlemon1-byte/emubooyyys@main/';
+
+    // Heavy cleanup for Chromebook
+    if (window.EJS_emulator) {
+        try { window.EJS_emulator.stop(); } catch(e) {}
+    }
+    gameDiv.innerHTML = `
+        <div id="loading-info">
+            Loading ${system.toUpperCase()} game...<br>
+            <small style="color:#aaa;">Chromebook mode — be patient, close other tabs</small>
+        </div>`;
 
     let coreName = 'genesis_plus_gx';
-    let biosUrl = `${repoURL}segacdbios/segacd_bios.zip`;   // ← update path if needed
+    let biosUrl = `${repoURL}segacdbios/segacd_bios.zip`;   // ← CHANGE THIS PATH IF YOUR BIOS IS ELSEWHERE
 
-    // === Handle full external URLs (GitHub Releases) vs relative paths ===
-    let finalGameUrl;
-    if (gamePath.startsWith('http://') || gamePath.startsWith('https://')) {
-        finalGameUrl = gamePath;                    // Full URL (your CHD release link)
-    } else {
-        finalGameUrl = `${repoURL}${gamePath}`;     // Normal repo file
-    }
+    // Handle full URLs (GitHub Releases) vs relative paths
+    let finalGameUrl = (gamePath.startsWith('http')) ? gamePath : `${repoURL}${gamePath}`;
 
-    // Sega CD specific settings
+    // System-specific settings
     if (system === 'segaCD') {
-        window.EJS_threads = false;
-        
+        coreName = 'genesis_plus_gx';
+        window.EJS_gameName = "Sonic CD";
         window.EJS_config = {
             retroarch: {
                 'genesis_plus_gx': {
-                    'genesis_plus_gx_region': 'NTSC-J'   // JP version
+                    'genesis_plus_gx_region': 'NTSC-J'
                 }
             }
         };
@@ -241,13 +245,11 @@ function loadGame(system, gamePath, isMultiPart = false, multiPartConfig = null)
         coreName = 'genesis_plus_gx';
     } else if (system === 'sega32x') {
         coreName = 'picodrive';
-    }
+    } else if (system === 'mame') {
+        coreName = 'mame';
+    } // add more systems as needed
 
-    // Skip merge for CHD
-    if (isMultiPart && multiPartConfig) {
-        alert("Multi-part merging not needed for CHD files.");
-        return;
-    }
+    window.EJS_threads = false;   // VERY IMPORTANT for GitHub Pages + low RAM
 
     startEmulator(finalGameUrl);
 
@@ -257,7 +259,7 @@ function loadGame(system, gamePath, isMultiPart = false, multiPartConfig = null)
         window.EJS_core = coreName;
         window.EJS_pathtodata = `${repoURL}emulatorjs/data/`;
         window.EJS_startOnLoaded = true;
-        window.EJS_biosUrl = biosUrl;
+        if (biosUrl) window.EJS_biosUrl = biosUrl;
 
         const script = document.createElement('script');
         script.src = `${repoURL}emulatorjs/data/loader.js`;
