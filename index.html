@@ -198,9 +198,15 @@ p.description {
     <div class="system-label">Sega 32x</div>
         <button onclick="loadGame('sega32x', '32x/Knuckles_%20Chaotix%20(1995)(Sega)(JP-US)(en).bin')">Knuckles' Chaotix</button>
         <button onclick="loadGame('sega32x', '32x/Tempo (1995)(Sega)(JP-US)(en).bin')">Tempo</button>
+
+    <div class="menu">
+    <div class="system-label">Sega CD</div>
+    <button onclick="loadGame('segaCD', 'https://github.com/demonlemon1-byte/emubooyyys/releases/download/sMOR/Sonic.CD.JP.chd')">
+        Sonic CD (Japan) — CHD
+    </button>
+    <!-- Add USA version the same way once uploaded -->
 </div>
-    <!-- Add more Sega CD games here later -->
-</div>
+    
 
 <script>
 function loadGame(system, gamePath, isMultiPart = false, multiPartConfig = null) {
