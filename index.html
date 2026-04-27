@@ -215,16 +215,6 @@ function loadGame(system, gamePath, isMultiPart = false, multiPartConfig = null)
     // Base for non-full-URL games (jsDelivr is fastest)
     const repoURL = 'https://github.com/demonlemon1-byte/emubooyyys/';
 
-    // Aggressive cleanup for Chromebook
-    if (window.EJS_emulator) {
-        try { window.EJS_emulator.stop(); } catch(e) {}
-    }
-    gameDiv.innerHTML = `
-        <div id="loading-info" style="color:#ffd700; padding:40px 20px; font-size:1.1em; text-align:center; line-height:1.4;">
-            Loading Sonic CD (CHD)<br>
-            <small style="color:#aaa;">Chromebook mode — this can take 30-120 seconds.<br>Close all other tabs/apps!</small>
-        </div>`;
-
     let coreName = 'genesis_plus_gx';
     let biosUrl = `${repoURL}segacdbios/segacd_bios.zip`;   // ← update path if needed
 
@@ -239,7 +229,6 @@ function loadGame(system, gamePath, isMultiPart = false, multiPartConfig = null)
     // Sega CD specific settings
     if (system === 'segaCD') {
         window.EJS_threads = false;
-        window.EJS_gameName = "Sonic CD";
         
         window.EJS_config = {
             retroarch: {
