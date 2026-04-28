@@ -204,90 +204,61 @@ p.description {
 </div>
     
 <script>
-// ====================== MAIN LOAD FUNCTION ======================
+// ====================== FIXED LOAD FUNCTION ======================
 function loadGame(system, gamePath) {
-    const container = document.getElementById('game-container');
     const gameDiv = document.getElementById('game');
-    
     const repoURL = 'https://cdn.jsdelivr.net/gh/demonlemon1-byte/emubooyyys@main/';
 
-    // Heavy cleanup for Chromebook
+    // Cleanup previous emulator
     if (window.EJS_emulator) {
         try { window.EJS_emulator.stop(); } catch(e) {}
     }
-    
+
+    // Show loading
     gameDiv.innerHTML = `
-        <div id="loading-info" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); padding:25px 40px; border-radius:12px; color:#ffd700; z-index:100; text-align:center; max-width:90%;">
+        <div id="loading-info">
             Loading ${system.toUpperCase()} game...<br>
-            <small style="color:#aaa; display:block; margin-top:8px;">Chromebook mode — be patient</small>
+            <small style="color:#aaa;">Chromebook mode — be patient</small>
         </div>`;
 
-    // ================ CORE MAPPING (FIXED) ================
-    let coreName;
-    let biosUrl = `${repoURL}segacdbios/segacd_bios.zip`;
+    // ==================== CORE MAPPING ====================
+    let coreName, biosUrl = null;
 
     switch(system) {
-        case 'mame':
-            coreName = 'mame';
-            biosUrl = null;
-            break;
-        case 'nes':
-            coreName = 'nes';
-            biosUrl = null;
-            break;
-        case 'snes':
-            coreName = 'snes';
-            biosUrl = null;
-            break;
-        case 'gb':
-            coreName = 'gambatte';   // or 'mgba' for GBC
-            biosUrl = null;
-            break;
-        case 'genesis':
-            coreName = 'genesis_plus_gx';
-            biosUrl = null;
-            break;
-        case 'sega32x':
-            coreName = 'picodrive';
-            biosUrl = null;
-            break;
+        case 'mame':      coreName = 'mame'; break;
+        case 'nes':       coreName = 'nes'; break;
+        case 'snes':      coreName = 'snes'; break;
+        case 'gb':        coreName = 'gambatte'; break;
+        case 'genesis':   coreName = 'genesis_plus_gx'; break;
+        case 'sega32x':   coreName = 'picodrive'; break;
         case 'segaCD':
             coreName = 'genesis_plus_gx';
-            // biosUrl stays set for Sega CD
+            biosUrl = `${repoURL}segacdbios/segacd_bios.zip`;
             window.EJS_gameName = "Sonic CD";
-            window.EJS_config = {
-                retroarch: {
-                    'genesis_plus_gx': {
-                        'genesis_plus_gx_region': 'NTSC-J'
-                    }
-                }
-            };
+            window.EJS_config = { retroarch: { 'genesis_plus_gx': { 'genesis_plus_gx_region': 'NTSC-J' } } };
             break;
         default:
-            coreName = system;  // fallback
+            coreName = system;
     }
 
-    // Handle full URLs (proxy or releases) vs repo files
-    let finalGameUrl = gamePath.startsWith('http') ? gamePath : `${repoURL}${gamePath}`;
+    // Full URL (proxy) or repo file
+    const finalGameUrl = gamePath.startsWith('http') ? gamePath : `${repoURL}${gamePath}`;
 
     window.EJS_threads = false;
 
-    startEmulator(finalGameUrl);
+    // Start emulator
+    window.EJS_player = '#game';
+    window.EJS_gameUrl = finalGameUrl;
+    window.EJS_core = coreName;
+    window.EJS_pathtodata = `${repoURL}emulatorjs/data/`;
+    window.EJS_startOnLoaded = true;
 
-    function startEmulator(url) {
-        window.EJS_player = '#game';
-        window.EJS_gameUrl = url;
-        window.EJS_core = coreName;
-        window.EJS_pathtodata = `${repoURL}emulatorjs/data/`;
-        window.EJS_startOnLoaded = true;
-        
-        if (biosUrl) window.EJS_biosUrl = biosUrl;
-        else delete window.EJS_biosUrl;
+    if (biosUrl) window.EJS_biosUrl = biosUrl;
+    else delete window.EJS_biosUrl;
 
-        const script = document.createElement('script');
-        script.src = `${repoURL}emulatorjs/data/loader.js`;
-        document.body.appendChild(script);
-    }
+    const script = document.createElement('script');
+    script.src = `${repoURL}emulatorjs/data/loader.js`;
+    document.body.appendChild(script);
 }
 </script>
 </body>
