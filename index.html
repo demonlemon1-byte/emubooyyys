@@ -124,6 +124,7 @@ p.description {
     <div class="system-label">NES</div>
     <button onclick="loadGame('nes','nes/Action 52 (USA) (Rev A) (Unl).nes')">Action 52</button>
     <button onclick="loadGame('nes','nes/Balloon Fight (USA).nes')">Balloon Fight</button>
+    <button onclick="loadGame('nes','nes/Bubble Bobble (USA).nes')">Bubble Bobble</button>
     <button onclick="loadGame('nes','nes/Donkey Kong Classics (USA, Europe).nes')">Donkey Kong Classics</button>
     <button onclick="loadGame('nes','nes/DuckTales (USA).nes')">DuckTales</button>
     <button onclick="loadGame('nes','nes/Kirby_s Adventure (USA).nes')">Kirby’s Adventure</button>
@@ -174,6 +175,13 @@ p.description {
     <button onclick="loadGame('gb','g*meboy/Wario Land - Super Mario Land 3 (World).gb')">Wario Land - Super Mario Land 3</button>
     <button onclick="loadGame('gb','g*meboy/Who Framed Roger Rabbit (USA).gb')">Who Framed Roger Rabbit</button>
 </div>
+    
+<div class="menu">
+    <div class="system-label">Game Boy Advance</div>
+    <button onclick="loadGame('gba','gba/Adventures of Jimmy Neutron Boy Genius vs. Jimmy Negatron, The (USA, Europe).gba')">The Adventures of Jimmy Neutron Boy Genius vs. Jimmy Negatron</button>
+
+    </div>
+
     
 <div class="menu">
     <div class="system-label">Genesis</div>
@@ -231,6 +239,7 @@ function loadGame(system, gamePath) {
         case 'gb':        coreName = 'gambatte'; break;
         case 'genesis':   coreName = 'genesis_plus_gx'; break;
         case 'sega32x':   coreName = 'picodrive'; break;
+        case 'gba':       coreName = 'mgba'; break;
         case 'segaCD':
             coreName = 'genesis_plus_gx';
             biosUrl = `${repoURL}segacdbios/segacd_bios.zip`;
