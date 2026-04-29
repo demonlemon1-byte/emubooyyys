@@ -254,8 +254,13 @@ function loadGame(system, gamePath) {
 
     switch(system) {
         case 'mame':      coreName = 'mame'; break;
-        case 'nes':       coreName = 'nes'; break;
-        case 'snes':      coreName = 'snes'; break;
+case 'nes':
+            coreName = 'nes';
+            // Auto-detect FDS and load BIOS
+            if (gamePath.toLowerCase().endsWith('.fds')) {
+                biosUrl = `${repoURL}disksys.rom`;   // ← Change path if your BIOS is elsewhere
+            }
+            break;        case 'snes':      coreName = 'snes'; break;
         case 'gb':        coreName = 'gambatte'; break;
         case 'genesis':   coreName = 'genesis_plus_gx'; break;
         case 'sega32x':   coreName = 'picodrive'; break;
